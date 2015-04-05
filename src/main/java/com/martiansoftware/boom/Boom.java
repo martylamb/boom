@@ -101,8 +101,6 @@ public class Boom extends SparkBase {
         return result;
     }
     
-    public static void autostart(){}
-    
 // the below is created by scripts/updateBoomJava    
 // ## BEGIN GENERATED CODE - DO NOT EDIT BELOW THIS LINE ##
     public static synchronized void connect(final String path, final Route route) {
