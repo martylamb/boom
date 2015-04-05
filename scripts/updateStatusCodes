@@ -1,0 +1,17 @@
+#!/bin/bash -e
+
+if [ ! -f pom.xml ]; then
+	echo "This must be run from the project root." >&2
+	exit 1
+fi
+
+REGISTRY="https://www.iana.org/assignments/http-status-codes/http-status-codes.txt"
+OUT="target/scripts/http-status-codes.txt"
+mkdir -p `dirname $OUT`
+
+if [ ! -f $OUT ]; then
+	curl $REGISTRY > $OUT
+fi
+
+egrep -i "^ +[0-9]{3} +[a-z]" $OUT | sed -e 's/ *\[.*//' -e 's/^ \+//' -e 's/ \+/=/' -e 's/ *$//'
+

@@ -1,0 +1,84 @@
+#!/bin/bash -e
+
+if [ ! -f pom.xml ]; then
+	echo "This must be run from the project root." >&2
+	exit 1
+fi
+
+MTFILE=/etc/mime.types
+if [ ! -f $MTFILE ]; then
+	echo "Unable to find file $MTFILE." >&2
+	exit 2
+fi
+
+OUT=src/main/java/com/martiansoftware/boom/MimeType.java
+
+#
+# scrub file extensions if necessary to be valid java enum identifiers.
+# convert to uppercase, replace non-alphanumerics chars with underscores,
+# and add an underscore prefix to anything 
+#
+function scrubExtension() {
+	echo $1 | tr '[:lower:]' '[:upper:]' | sed -e 's/[^A-Z0-9]/_/g' -e 's/^\([0-9]\)/_\1/'
+}
+
+#	
+# write out one enum value for a given mime type and file extension
+# e.g.: BIN("application/octet-stream"),
+#
+function addType() {
+	local EXT=`scrubExtension $1`
+	local MT=$2
+	echo "    ${EXT}(\"$MT\"),"
+}
+
+
+#
+# enum class file intro
+#
+cat <<EOF > $OUT
+package com.martiansoftware.boom;
+
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
+public enum MimeType {
+EOF
+
+#
+# derive enum values from /etc/mime.types file on local system
+#
+( awk '/^[^#]/ { for(i=2; i <= NF; ++i) print $i " "$1 }' /etc/mime.types | sort | while read A B; do addType $A $B; done ) | sed '$ s/,/;/' >> $OUT
+
+
+#
+# enum class file wrapup
+#
+cat <<EOF >> $OUT
+
+    private static final Pattern ext = Pattern.compile("^.*\\\\.([^.]+)$");
+    private final String type;
+    
+    public static MimeType forFile(String filename) {
+        Matcher m = ext.matcher(filename);
+        MimeType result = BIN;
+        if (m.matches()) {
+            String ex = m.group(1).toUpperCase();
+            if (Character.isDigit(ex.charAt(0))) ex = "_" + ex;
+            try {
+                result = MimeType.valueOf(ex);
+            } catch (Exception ohWell) {}
+        }
+        return result;
+    }
+
+    private MimeType(String t) {
+        type = t;
+    }
+    
+    @Override public String toString() {
+        return type;
+    }
+}
+
+EOF

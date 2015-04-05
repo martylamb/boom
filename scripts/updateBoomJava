@@ -1,0 +1,60 @@
+#!/bin/bash -e
+
+F="./src/main/java/com/martiansoftware/boom/Boom.java"
+if [ ! -f $F ]; then
+	echo "This must be run from the project root." >&2
+	exit 1
+fi
+
+OUT="target/scripts/Boom.java"
+mkdir -p `dirname $OUT`
+
+DELIM="## BEGIN GENERATED CODE - DO NOT EDIT BELOW THIS LINE ##"
+
+# copy everything up to the generated code delimiter
+sed -n "/$DELIM/q;p" $F > $OUT
+
+# stick it back in for idempotence
+echo "// $DELIM" >> $OUT
+
+# insert http-method-specific methods
+for METHOD in connect delete get head options patch post put trace; do
+cat <<EOF >> $OUT
+    public static synchronized void ${METHOD}(final String path, final Route route) {
+        Spark.${METHOD}(path, boomwrap(route));
+    }
+    
+    public static synchronized void ${METHOD}(final String path, final SimpleRoute route) {
+        Spark.${METHOD}(path, boomwrap(route));
+    }
+    
+    public static synchronized void ${METHOD}(String path, Route route, ResponseTransformer transformer) {
+        Spark.${METHOD}(path, boomwrap(route), transformer);
+    }
+    
+    public static synchronized void ${METHOD}(String path, String acceptType, Route route) {
+        Spark.${METHOD}(path, acceptType, boomwrap(route));
+    }
+    
+    public static synchronized void ${METHOD}(String path, String acceptType, Route route, ResponseTransformer transformer) {
+        Spark.${METHOD}(path, acceptType, boomwrap(route), transformer);
+    }
+    
+    public static synchronized void ${METHOD}(String path, String acceptType, TemplateViewRoute route, TemplateEngine engine) {
+        Spark.${METHOD}(path, acceptType, boomwrap(route), engine);
+    }
+    
+    public static synchronized void ${METHOD}(String path, TemplateViewRoute route, TemplateEngine engine) {
+        Spark.${METHOD}(path, boomwrap(route), engine);
+    }
+
+EOF
+done
+
+# close the class
+echo "}" >> $OUT
+
+if [ -f $OUT ]; then
+	rm $F
+	cp $OUT $F
+fi
