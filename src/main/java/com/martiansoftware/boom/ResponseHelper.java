@@ -66,7 +66,7 @@ public class ResponseHelper {
         rsp.status(status);
         rsp.type(mimeType);
         if (bodyStream != null) {
-            IOUtils.copy(bodyStream, rsp.raw().getOutputStream());
+            copyStream(bodyStream, rsp.raw().getOutputStream());
             rsp.raw().getOutputStream().close();
             return rsp.raw();
         } else {
@@ -74,6 +74,12 @@ public class ResponseHelper {
         }
     }
     
+    private void copyStream(InputStream from, OutputStream to) throws IOException {
+        int len, bufsize = 8192;
+        byte[] buf = new byte[bufsize];
+        while ((len = from.read(buf)) != -1) to.write(buf, 0, len);
+    }
+
     @Override public String toString() {
         StringBuilder sb = new StringBuilder("ResponseHelper: ");
         if (bodyStream != null) sb.append("(InputStream) ");

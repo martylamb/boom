@@ -70,6 +70,10 @@ public class Boom extends SparkBase {
     public static Request request() { return _request.get(); }
     public static Response response() { return _response.get(); }
     
+    // simple redirect shorthand - makes it easier to redirect from a simpleroute
+    public static Object redirect(String location, int statusCode) { response().redirect(location, statusCode); return null; }
+    public static Object redirect(String location) { response().redirect(location); return null; }
+    
     public static DumbTemplate template(String templatePath) { return _templates.get(templatePath); }
     public static DumbTemplateStore templateStore() { return _templates; }
 
