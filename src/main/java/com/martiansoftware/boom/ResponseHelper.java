@@ -9,7 +9,6 @@ import java.io.OutputStream;
 import java.net.URL;
 import javax.servlet.http.HttpServletResponse;
 import spark.Response;
-import spark.utils.IOUtils;
 
 /**
  *

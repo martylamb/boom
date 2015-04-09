@@ -1,7 +1,12 @@
 package com.martiansoftware.boom;
 
+import com.martiansoftware.dumbtemplates.DumbLazyClasspathTemplateStore;
+import com.martiansoftware.dumbtemplates.DumbLazyFileTemplateStore;
+import com.martiansoftware.dumbtemplates.DumbLogger;
 import com.martiansoftware.dumbtemplates.DumbTemplate;
 import com.martiansoftware.dumbtemplates.DumbTemplateStore;
+import java.io.IOException;
+import java.io.Reader;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,37 +36,12 @@ public class Boom extends SparkBase {
     private static final ThreadLocal<Map<String, Object>> _context = new ThreadLocal<>();
     
     private static final DumbTemplateStore _templates;
-
+    
     static {
-        _debug = initDebug();
-        _InitStaticContent.init();
-        
-        Spark.before((Request req, Response rsp) -> {
-            _request.set(req);
-            _response.set(rsp);
-            _context.set(new java.util.HashMap<>());
-        });
-
-        _templates = _InitTemplates.init();
-        _InitDebugUi.init();
-        
-//        Spark.exception(HaltException.class, new ExceptionHandler(){
-//
-//            @Override
-//            public void handle(Exception e, Request rqst, Response rspns) {
-//                if (e instanceof HaltException) {
-//                    HaltException he = (HaltException) e;
-//                    Map<String, Object> context = new java.util.HashMap<>();
-//
-//                    context.put("code", he.getStatusCode());
-//                    context.put("msg", he.getBody());
-//                    rspns.status(he.getStatusCode());
-//                    rspns.body(template("/boom/status/status.html").render(context));
-//                } else {
-//                    e.printStackTrace();
-//                }
-//            }
-//        });
+        initStaticContent();
+        initThreadLocalsFilter();
+        _debug = Debug.init();
+        _templates = Templates.init();
     }
     
     public static void init() {} // external entrypoing to trigger static initializer if needed
@@ -93,16 +73,22 @@ public class Boom extends SparkBase {
         return route;
     }
     
-    private static boolean initDebug() {
-        // can be set by environment var or system property.  system property setting wins if set.
-        String d = System.getProperty("BOOM_DEBUG", System.getenv("BOOM_DEBUG"));
-        boolean result = (d != null && d.trim().equals("1"));
-        if (result) {
-            log.warn("*****************************");
-            log.warn("*** RUNNING IN DEBUG MODE ***");
-            log.warn("*****************************");
+    
+    // below methods set up all the static boom fun stuff
+    static void initStaticContent() {
+        if (debug()) {
+            externalStaticFileLocation("src/main/resources/static-content");
+        } else {
+            staticFileLocation("/static-content");
         }
-        return result;
+    }
+
+    private static void initThreadLocalsFilter() {
+        Spark.before((Request req, Response rsp) -> {
+            _request.set(req);
+            _response.set(rsp);
+            _context.set(new java.util.HashMap<>());
+        });        
     }
     
 // the below is created by scripts/updateBoomJava    

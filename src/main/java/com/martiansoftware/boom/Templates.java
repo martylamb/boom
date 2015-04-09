@@ -1,6 +1,5 @@
 package com.martiansoftware.boom;
 
-import com.google.gson.Gson;
 import com.martiansoftware.dumbtemplates.DumbLazyClasspathTemplateStore;
 import com.martiansoftware.dumbtemplates.DumbLazyFileTemplateStore;
 import com.martiansoftware.dumbtemplates.DumbLogger;
@@ -15,12 +14,10 @@ import org.slf4j.LoggerFactory;
  *
  * @author mlamb
  */
-class _InitTemplates {
-
-    private static final Logger log = LoggerFactory.getLogger(Boom.class);
+class Templates {
+    private static final Logger log = LoggerFactory.getLogger(Templates.class);
     
     static DumbTemplateStore init() {
-        
         // dumbtemplate logging is intentionally... dumb.
         // emsmarten it a little.
         DumbLogger d = new DumbLogger() {
@@ -65,11 +62,7 @@ class _InitTemplates {
         @Override public DumbTemplate get(String templateName) {
             DumbTemplate result = _main.get(templateName);
             return (result == null) ? _defaults.get(templateName) : result;
-        }
-//        @Override public DumbTemplateStore setGson(Gson gson) {
-//             _main.setGson(gson);
-//             return _main;
-//        }
+        }        
         
     }
 }
