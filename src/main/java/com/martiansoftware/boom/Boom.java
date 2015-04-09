@@ -1,12 +1,7 @@
 package com.martiansoftware.boom;
 
-import com.martiansoftware.dumbtemplates.DumbLazyClasspathTemplateStore;
-import com.martiansoftware.dumbtemplates.DumbLazyFileTemplateStore;
-import com.martiansoftware.dumbtemplates.DumbLogger;
 import com.martiansoftware.dumbtemplates.DumbTemplate;
 import com.martiansoftware.dumbtemplates.DumbTemplateStore;
-import java.io.IOException;
-import java.io.Reader;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
