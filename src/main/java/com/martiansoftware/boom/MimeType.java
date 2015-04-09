@@ -1123,7 +1123,7 @@ public enum MimeType {
     private static final Pattern ext = Pattern.compile("^.*\\.([^.]+)$");
     private final String type;
     
-    public static MimeType forFile(String filename) {
+    public static MimeType forFilename(String filename) {
         Matcher m = ext.matcher(filename);
         MimeType result = BIN;
         if (m.matches()) {

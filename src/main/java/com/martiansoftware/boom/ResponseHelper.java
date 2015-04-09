@@ -1,6 +1,7 @@
 package com.martiansoftware.boom;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -21,6 +22,7 @@ public class ResponseHelper {
     private String bodyString;
     private String mimeType = MimeType.HTML.toString();
     
+    public ResponseHelper() { this(""); }
     public ResponseHelper(InputStream in) { body(in); }
     public ResponseHelper(String s) { body(s); }
     public ResponseHelper(File f) throws IOException { body(f); }
@@ -31,13 +33,13 @@ public class ResponseHelper {
     public ResponseHelper body(File f) throws IOException { 
         bodyStream = new BufferedInputStream(new FileInputStream(f));
         bodyString = null;
-        mimeType(MimeType.forFile(f.getName()));
+        mimeType(MimeType.forFilename(f.getName()));
         return this;
     }
     public ResponseHelper body(URL url) throws IOException {
         bodyStream = url.openStream();
         bodyString = null;
-        mimeType(MimeType.forFile(url.getFile().replaceAll(".*/", "")));
+        mimeType(MimeType.forFilename(url.getFile().replaceAll(".*/", "")));
         return this;
     }
     
@@ -61,11 +63,20 @@ public class ResponseHelper {
     public ResponseHelper xml() { return mimeType(MimeType.XML); }
     public ResponseHelper json() { return mimeType(MimeType.JSON); }
     
+    // compound helpers for concise common use cases
+    public ResponseHelper html(String html) { body(html); return html(); }
+    public ResponseHelper json(String json) { body(json); return json(); }
+    public ResponseHelper text(String text) { body(text); return text(); }
+    public ResponseHelper xml(String xml) { body(xml); return xml(); }
+    public ResponseHelper binary(byte[] b) { body(new ByteArrayInputStream(b)); return binary(); }
+    public ResponseHelper binary(byte[] b, int offset, int len) { body(new ByteArrayInputStream(b, offset, len)); return binary(); }
+    
     Object respond(Response rsp) throws IOException {
         rsp.status(status);
         rsp.type(mimeType);
         if (bodyStream != null) {
             copyStream(bodyStream, rsp.raw().getOutputStream());
+            bodyStream.close();
             rsp.raw().getOutputStream().close();
             return rsp.raw();
         } else {
