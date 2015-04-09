@@ -1,5 +1,7 @@
 package com.martiansoftware.boom;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.martiansoftware.dumbtemplates.DumbTemplate;
 import com.martiansoftware.dumbtemplates.DumbTemplateStore;
 import java.util.Map;
@@ -31,6 +33,7 @@ public class Boom extends SparkBase {
     private static final ThreadLocal<Map<String, Object>> _context = new ThreadLocal<>();
     
     private static final DumbTemplateStore _templates;
+    private static Gson _gson;
     
     static {
         initStaticContent();
@@ -59,6 +62,13 @@ public class Boom extends SparkBase {
     public static void halt(int status, String body) { Spark.halt(status, body); }
     public static void halt(String body) { Spark.halt(body); }
     public static synchronized void exception(Class<? extends Exception> exceptionClass, ExceptionHandler handler) { Spark.exception(exceptionClass, handler); }
+    
+    public static String json(Object o) {
+        if (_gson == null) {
+            _gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssX").setPrettyPrinting().create();
+        }
+        return _gson.toJson(o);
+    }
     
     protected static Route boomwrap(final Route route) {
         return new BoomRoute(route);

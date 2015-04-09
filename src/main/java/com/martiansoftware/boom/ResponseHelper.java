@@ -66,7 +66,8 @@ public class ResponseHelper {
     // compound helpers for concise common use cases
     public ResponseHelper html(String html) { body(html); return html(); }
     public ResponseHelper json(String json) { body(json); return json(); }
-    // TODO: public ResponseHelper json(Object jobj) { body(toJson(jobj)); return json(); }
+    public ResponseHelper json(Object jobj) { body(Boom.json(jobj)); return json(); }
+    
     public ResponseHelper text(String text) { body(text); return text(); }
     public ResponseHelper xml(String xml) { body(xml); return xml(); }
     public ResponseHelper binary(byte[] b) { body(new ByteArrayInputStream(b)); return binary(); }
