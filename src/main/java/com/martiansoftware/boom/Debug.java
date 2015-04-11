@@ -86,7 +86,7 @@ class Debug {
     
     private void getDebugResource(String resource) {
         get(urlOf(resource), () -> {
-            return new ResponseHelper(Debug.class.getResource(DEBUG_CP_STATIC_RESOURCES + "/" + resource));
+            return new BoomResponse(Debug.class.getResource(DEBUG_CP_STATIC_RESOURCES + "/" + resource));
         });
     }
 

@@ -42,10 +42,31 @@ public class Boom extends SparkBase {
         _templates = Templates.init();
     }
     
-    public static void init() {} // external entrypoing to trigger static initializer if needed
+    /**
+     * Provides an external entrypoint that can trigger Boom's static initializer
+     * if needed
+     */
+    public static void init() {}
     
-    public static boolean debug() { return _debug; }    
+    /**
+     * Is Boom running in debug mode?  Debug mode allows reloading of changed
+     * static files and templates from the source tree rather than loading once
+     * from the classpath, and enables the helper application at /boom-debug
+     * 
+     * @return true if Boom is running in debug mode
+     */
+    public static boolean debug() { return _debug; }
+    
+    /**
+     * Returns the Spark Request that is currently being serviced
+     * @return the Spark Request that is currently being serviced
+     */
     public static Request request() { return _request.get(); }
+
+    /**
+     * Returns the Spark Response that is currently being serviced
+     * @return the Spark Response that is currently being serviced
+    */
     public static Response response() { return _response.get(); }
     
     // simple redirect shorthand - makes it easier to redirect from a simpleroute
@@ -71,7 +92,7 @@ public class Boom extends SparkBase {
     }
     
     protected static Route boomwrap(final Route route) {
-        return new BoomRoute(route);
+        return new RouteWrapper(route);
     }
     
     protected static TemplateViewRoute boomwrap(TemplateViewRoute route) {
@@ -102,7 +123,7 @@ public class Boom extends SparkBase {
         Spark.connect(path, boomwrap(route));
     }
     
-    public static synchronized void connect(final String path, final SimpleRoute route) {
+    public static synchronized void connect(final String path, final BoomRoute route) {
         Spark.connect(path, boomwrap(route));
     }
     
@@ -130,7 +151,7 @@ public class Boom extends SparkBase {
         Spark.delete(path, boomwrap(route));
     }
     
-    public static synchronized void delete(final String path, final SimpleRoute route) {
+    public static synchronized void delete(final String path, final BoomRoute route) {
         Spark.delete(path, boomwrap(route));
     }
     
@@ -158,7 +179,7 @@ public class Boom extends SparkBase {
         Spark.get(path, boomwrap(route));
     }
     
-    public static synchronized void get(final String path, final SimpleRoute route) {
+    public static synchronized void get(final String path, final BoomRoute route) {
         Spark.get(path, boomwrap(route));
     }
     
@@ -186,7 +207,7 @@ public class Boom extends SparkBase {
         Spark.head(path, boomwrap(route));
     }
     
-    public static synchronized void head(final String path, final SimpleRoute route) {
+    public static synchronized void head(final String path, final BoomRoute route) {
         Spark.head(path, boomwrap(route));
     }
     
@@ -214,7 +235,7 @@ public class Boom extends SparkBase {
         Spark.options(path, boomwrap(route));
     }
     
-    public static synchronized void options(final String path, final SimpleRoute route) {
+    public static synchronized void options(final String path, final BoomRoute route) {
         Spark.options(path, boomwrap(route));
     }
     
@@ -242,7 +263,7 @@ public class Boom extends SparkBase {
         Spark.patch(path, boomwrap(route));
     }
     
-    public static synchronized void patch(final String path, final SimpleRoute route) {
+    public static synchronized void patch(final String path, final BoomRoute route) {
         Spark.patch(path, boomwrap(route));
     }
     
@@ -270,7 +291,7 @@ public class Boom extends SparkBase {
         Spark.post(path, boomwrap(route));
     }
     
-    public static synchronized void post(final String path, final SimpleRoute route) {
+    public static synchronized void post(final String path, final BoomRoute route) {
         Spark.post(path, boomwrap(route));
     }
     
@@ -298,7 +319,7 @@ public class Boom extends SparkBase {
         Spark.put(path, boomwrap(route));
     }
     
-    public static synchronized void put(final String path, final SimpleRoute route) {
+    public static synchronized void put(final String path, final BoomRoute route) {
         Spark.put(path, boomwrap(route));
     }
     
@@ -326,7 +347,7 @@ public class Boom extends SparkBase {
         Spark.trace(path, boomwrap(route));
     }
     
-    public static synchronized void trace(final String path, final SimpleRoute route) {
+    public static synchronized void trace(final String path, final BoomRoute route) {
         Spark.trace(path, boomwrap(route));
     }
     
