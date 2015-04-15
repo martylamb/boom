@@ -1,9 +1,8 @@
 package com.martiansoftware.boom;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.martiansoftware.dumbtemplates.DumbTemplate;
 import com.martiansoftware.dumbtemplates.DumbTemplateStore;
+import java.util.Locale;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +37,10 @@ public class Boom extends SparkBase {
     private static final ThreadLocal<Map<String, Object>> _context = new ThreadLocal<>();
     
     private static final DumbTemplateStore _templates;
+    private static final PathResolver _pathResolver = new PathResolver("/");
     
     static {
+        // TODO: allow port and static content to be done before routes are added.
         initStaticContent();
         initThreadLocalsFilter();
         _debug = Debug.init();
@@ -72,6 +73,21 @@ public class Boom extends SparkBase {
      * @return the Spark Response that is currently being serviced
     */
     public static Response response() { return _response.get(); }
+    
+    public static String resolvePath(String path) { return _pathResolver.resolve(path).toString(); }
+
+    public static void locale(Locale locale) {
+        session(true).attribute(Constants.LOCALE_ATTRIBUTE, locale);
+    }
+    
+    public static Locale locale() { 
+        Locale result =  session(true).attribute(Constants.LOCALE_ATTRIBUTE);
+        if (result == null) {
+            result = request().raw().getLocale();
+            locale(result);
+        }
+        return result;
+    }
     
     /**
      * Specify a ContextFactory to provide a preinitialized or otherwise specialized context
@@ -126,9 +142,9 @@ public class Boom extends SparkBase {
     // below methods set up all the static boom fun stuff
     static void initStaticContent() {
         if (debug()) {
-            externalStaticFileLocation("src/main/resources/static-content");
+            externalStaticFileLocation(Constants.STATIC_CONTENT_DEBUG);
         } else {
-            staticFileLocation("/static-content");
+            staticFileLocation(Constants.STATIC_CONTENT_PRODUCTION);
         }
     }
 
@@ -136,7 +152,11 @@ public class Boom extends SparkBase {
         Spark.before((Request req, Response rsp) -> {
             _request.set(req);
             _response.set(rsp);
-            _context.set(new java.util.HashMap<>());
+            
+            Map<String, Object> ctx = _contextFactory.createContext(); // use optional?
+            if (ctx == null) ctx = new java.util.HashMap<String, Object>();
+            ctx.put(Constants.BOOM_ROOT, _pathResolver.resolve("/"));
+            _context.set(ctx);
         });        
     }
     

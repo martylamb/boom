@@ -28,7 +28,7 @@ class Debug {
     
     static boolean init() {
         // can be set by environment var or system property.  system property setting wins if set.
-        String d = System.getProperty("BOOM_DEBUG", System.getenv("BOOM_DEBUG"));
+        String d = System.getProperty(Constants.DEBUG_ENV_OR_PROPERTY, System.getenv(Constants.DEBUG_ENV_OR_PROPERTY));
         boolean result = (d != null && d.trim().equals("1"));
         if (result) {
             log.warn("*****************************");
