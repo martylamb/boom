@@ -66,7 +66,7 @@ public class BoomResponse {
     // compound helpers for concise common use cases
     public BoomResponse html(String html) { body(html); return html(); }
     public BoomResponse json(String json) { body(json); return json(); }
-    public BoomResponse json(Object jobj) { body(Boom.json(jobj)); return json(); }
+    public BoomResponse json(Object jobj) { body(Json.toJson(jobj)); return json(); }
     
     public BoomResponse text(String text) { body(text); return text(); }
     public BoomResponse xml(String xml) { body(xml); return xml(); }

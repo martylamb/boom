@@ -8,11 +8,13 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.ExceptionHandler;
+import spark.Filter;
 import spark.ModelAndView;
 import spark.Request;
 import spark.Response;
 import spark.ResponseTransformer;
 import spark.Route;
+import spark.Session;
 import spark.Spark;
 import spark.SparkBase;
 import spark.TemplateEngine;
@@ -30,10 +32,12 @@ public class Boom extends SparkBase {
     
     private static final ThreadLocal<Request> _request = new ThreadLocal<>();
     private static final ThreadLocal<Response> _response = new ThreadLocal<>();
+    
+    private static ContextFactory _contextFactory = java.util.HashMap::new;
+
     private static final ThreadLocal<Map<String, Object>> _context = new ThreadLocal<>();
     
     private static final DumbTemplateStore _templates;
-    private static Gson _gson;
     
     static {
         initStaticContent();
@@ -69,12 +73,29 @@ public class Boom extends SparkBase {
     */
     public static Response response() { return _response.get(); }
     
+    /**
+     * Specify a ContextFactory to provide a preinitialized or otherwise specialized context
+     * @param cf the ContextFactory to use for all requests
+     */
+    public static void contextFactory(ContextFactory cf) { _contextFactory = cf; }
+    
+    /**
+     * Returns the working template context
+     * @return the working template context
+     */
+    public static Map<String, Object> context() { return _context.get(); }
+
     // simple redirect shorthand - makes it easier to redirect from a simpleroute
     public static Object redirect(String location, int statusCode) { response().redirect(location, statusCode); return null; }
     public static Object redirect(String location) { response().redirect(location); return null; }
     
+    // basic template accessors
     public static DumbTemplate template(String templatePath) { return _templates.get(templatePath); }
     public static DumbTemplateStore templateStore() { return _templates; }
+
+    // TODO: client-side sessions
+    public static Session session(boolean create) { return request().session(create); }
+    public static Session session() { return session(true); }
 
     // straight passthrough to Spark methods
     public static ModelAndView modelAndView(Object model, String viewName) { return Spark.modelAndView(model, viewName); }
@@ -84,12 +105,14 @@ public class Boom extends SparkBase {
     public static void halt(String body) { Spark.halt(body); }
     public static synchronized void exception(Class<? extends Exception> exceptionClass, ExceptionHandler handler) { Spark.exception(exceptionClass, handler); }
     
-    public static String json(Object o) {
-        if (_gson == null) {
-            _gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssX").setPrettyPrinting().create();
-        }
-        return _gson.toJson(o);
-    }
+    public static void before(Filter filter) { Spark.before(filter); }
+    public static void before(String path, Filter filter) { Spark.before(path, filter); }
+    public static void before(String path, String acceptType, Filter filter) { Spark.before(path, acceptType, filter); }
+    
+    public static void after(Filter filter) { Spark.after(filter); }
+    public static void after(String path, Filter filter) { Spark.after(path, filter); }
+    public static void after(String path, String acceptType, Filter filter) { Spark.after(path, acceptType, filter); }
+    
     
     protected static Route boomwrap(final Route route) {
         return new RouteWrapper(route);
@@ -115,6 +138,10 @@ public class Boom extends SparkBase {
             _response.set(rsp);
             _context.set(new java.util.HashMap<>());
         });        
+    }
+    
+    public interface ContextFactory {
+        public Map<String, Object> createContext();
     }
     
 // the below is created by scripts/updateBoomJava    

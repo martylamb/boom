@@ -53,11 +53,18 @@ class Debug {
         get(DEBUG_URL_PREFIX + "/", () -> doRequest());           
         get(DEBUG_URL_PREFIX + "/list", () -> list());
         
-        spark.Spark.before((req,rsp) -> { _rrLog.add(new RR(req,rsp)); });
+        spark.Spark.after((req,rsp) -> { _rrLog.add(new RR(req,rsp)); });
+        
+//        spark.Spark.after((req,rsp) -> {
+//            
+//            System.out.println("Returned " + rsp.raw().getStatus());
+//            System.out.println()
+//        });
     }
     
     private Object list() {
         Map<String, Object> context = new java.util.HashMap<>();
+        _rrLog.update();
         context.put("reqrsp", _rrLog.list);
         return _templates.get("list.html").render(context);
     }
@@ -135,6 +142,9 @@ class Debug {
             this.req = new RequestLog(req);
             this.rsp = new ResponseLog(rsp);
         }
+        void setResponse(Response rsp) {
+            this.rsp.update(rsp);
+        }
     }
     
     private class RequestLog {
@@ -159,14 +169,18 @@ class Debug {
         transient Response rsp;
         ResponseLog(Response rsp) {
             this.rsp = rsp;
+            update();
         }
-        void update() {
-//            if (rsp != null && rsp.raw().isCommitted()) {
+        void update(Response rsp) {
+            this.rsp = rsp;
+            update();
+        }
+        private void update() {
+            if (rsp != null) {
                 status = rsp.raw().getStatus();
                 type = rsp.raw().getContentType();
                 body = rsp.body();
-//                rsp = null;
-//            }
+            }
         }
     }
 }
