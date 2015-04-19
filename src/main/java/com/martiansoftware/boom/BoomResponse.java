@@ -93,10 +93,10 @@ public class BoomResponse {
     }
 
     @Override public String toString() {
-        StringBuilder sb = new StringBuilder("ResponseHelper: ");
-        if (bodyStream != null) sb.append("(InputStream) ");
-        else sb.append("(String) " );
-        sb.append("type: ");
+        StringBuilder sb = new StringBuilder(this.getClass().getName());
+        sb.append(": ");
+        sb.append((bodyStream == null) ? "(String)" : "(InputStream)");
+        sb.append(" type: ");
         sb.append(mimeType);
         sb.append(" status: ");
         sb.append(status);
