@@ -2,7 +2,11 @@
 
 Boom is a simple convention-over-configuration library that wraps around [Spark](http://sparkjava.com) to allow simple web applications to be built extremely quickly.  Its primary goal is to match my own development style and reduce boilerplate.  Hopefully you'll find it useful, too.
 
-Just use com.martiansoftware.boom.Boom in place of spark.Spark for additional functionality.  Spark is used behind the scenes by Boom.  You can still call Spark directly from the same application if you like.
+```java
+import static com.martiansoftware.boom.Boom.*;
+```
+Use com.martiansoftware.boom.Boom in place of spark.Spark for additional functionality.  Spark is used behind the scenes by Boom.  You can still call Spark directly from the same application if you like.
+
 
 
 ## BoomRoute
@@ -39,7 +43,7 @@ If the environment variable or system property BOOM_DEBUG is "1", then certain b
 
 Static content is automatically configured to load from the classpath under /static-content.  For Maven projects, just put them into src/main/resources/static-content and it's all set up for you.  When your jar is bundled and delivered, static content will automatically be packaged and included by Maven.
 
-If running in Debug Mode, then static content is instead automatically configured to load from the filesystem under src/main/resources/static-content.  This allows reloading of content from the filesystem during development without restarting your application.
+**If running in Debug Mode**, then static content is instead automatically configured to load from the filesystem under src/main/resources/static-content.  This allows reloading of content from the filesystem during development without restarting your application.
 
 ## Templates
 
@@ -47,6 +51,16 @@ You can use Spark's built-in template functionality, but Boom provides helpers f
 
 Behavior is similar to that for static content: templates are automatically configured to load from the classpath under /templates.  For Maven projects, just put them into src/main/resources/templates and it's all set up for you.  When your jar is bundled and delivered, templates will be automatically packaged and included by Maven.
 
-If running in Debug Mode, then templates are instead automatically configured to load from the filesystem under src/main/resources/templates.  This allows reloading of templates from the filesystem during development without restarting your application.
+**If running in Debug Mode**, then templates are instead automatically configured to load from the filesystem under src/main/resources/templates.  This allows reloading of templates from the filesystem during development without restarting your application.
 
+## TODO
 
+A bunch of things remain planned:
+
+  * Authentication Filter
+  * Automatic CSRF protection
+  * i18n
+  * separate jars bundling existing static content (e.g. jquery, font-awesome, etc.)
+  * Maven project archetype
+  * Debug-mode use of external tools like request.bin or other http test endpoints
+  
