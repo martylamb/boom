@@ -35,7 +35,9 @@ class Debug {
             log.warn("*** RUNNING IN DEBUG MODE ***");
             log.warn("*****************************");
 
-            log.warn("Exposing debug UI at {}", DEBUG_URL_PREFIX);        
+            log.warn("Exposing debug UI at {}", DEBUG_URL_PREFIX);  
+            
+            // TODO: change log level
             new Debug().registerUI();
         }
         return result;

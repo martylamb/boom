@@ -18,6 +18,7 @@ import spark.Spark;
 import spark.SparkBase;
 import spark.TemplateEngine;
 import spark.TemplateViewRoute;
+import spark.route.HttpMethod;
 
 /**
  *
@@ -164,257 +165,332 @@ public class Boom extends SparkBase {
         public Map<String, Object> createContext();
     }
     
+    private static void addingRoute(HttpMethod method, 
+                                    String path, 
+                                    String acceptType, 
+                                    Route route,
+                                    ResponseTransformer transformer,
+                                    TemplateViewRoute tvr,
+                                    TemplateEngine engine) {
+        
+        StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+        log.debug("Adding route for {} {} from {}", method, path, stack[3]);
+    }
+    
 // the below is created by scripts/updateBoomJava    
 // ## BEGIN GENERATED CODE - DO NOT EDIT BELOW THIS LINE ##
     public static synchronized void connect(final String path, final Route route) {
+        addingRoute(HttpMethod.connect, path, null, route, null, null, null);
         Spark.connect(path, boomwrap(route));
     }
     
     public static synchronized void connect(final String path, final BoomRoute route) {
+        addingRoute(HttpMethod.connect, path, null, route, null, null, null);
         Spark.connect(path, boomwrap(route));
     }
     
     public static synchronized void connect(String path, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.connect, path, null, route, transformer, null, null);
         Spark.connect(path, boomwrap(route), transformer);
     }
     
     public static synchronized void connect(String path, String acceptType, Route route) {
+        addingRoute(HttpMethod.connect, path, acceptType, route, null, null, null);
         Spark.connect(path, acceptType, boomwrap(route));
     }
     
     public static synchronized void connect(String path, String acceptType, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.connect, path, acceptType, route, transformer, null, null);
         Spark.connect(path, acceptType, boomwrap(route), transformer);
     }
     
     public static synchronized void connect(String path, String acceptType, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.connect, path, acceptType, null, null, route, engine);
         Spark.connect(path, acceptType, boomwrap(route), engine);
     }
     
     public static synchronized void connect(String path, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.connect, path, null, null, null, route, engine);
         Spark.connect(path, boomwrap(route), engine);
     }
 
     public static synchronized void delete(final String path, final Route route) {
+        addingRoute(HttpMethod.delete, path, null, route, null, null, null);
         Spark.delete(path, boomwrap(route));
     }
     
     public static synchronized void delete(final String path, final BoomRoute route) {
+        addingRoute(HttpMethod.delete, path, null, route, null, null, null);
         Spark.delete(path, boomwrap(route));
     }
     
     public static synchronized void delete(String path, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.delete, path, null, route, transformer, null, null);
         Spark.delete(path, boomwrap(route), transformer);
     }
     
     public static synchronized void delete(String path, String acceptType, Route route) {
+        addingRoute(HttpMethod.delete, path, acceptType, route, null, null, null);
         Spark.delete(path, acceptType, boomwrap(route));
     }
     
     public static synchronized void delete(String path, String acceptType, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.delete, path, acceptType, route, transformer, null, null);
         Spark.delete(path, acceptType, boomwrap(route), transformer);
     }
     
     public static synchronized void delete(String path, String acceptType, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.delete, path, acceptType, null, null, route, engine);
         Spark.delete(path, acceptType, boomwrap(route), engine);
     }
     
     public static synchronized void delete(String path, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.delete, path, null, null, null, route, engine);
         Spark.delete(path, boomwrap(route), engine);
     }
 
     public static synchronized void get(final String path, final Route route) {
+        addingRoute(HttpMethod.get, path, null, route, null, null, null);
         Spark.get(path, boomwrap(route));
     }
     
     public static synchronized void get(final String path, final BoomRoute route) {
+        addingRoute(HttpMethod.get, path, null, route, null, null, null);
         Spark.get(path, boomwrap(route));
     }
     
     public static synchronized void get(String path, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.get, path, null, route, transformer, null, null);
         Spark.get(path, boomwrap(route), transformer);
     }
     
     public static synchronized void get(String path, String acceptType, Route route) {
+        addingRoute(HttpMethod.get, path, acceptType, route, null, null, null);
         Spark.get(path, acceptType, boomwrap(route));
     }
     
     public static synchronized void get(String path, String acceptType, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.get, path, acceptType, route, transformer, null, null);
         Spark.get(path, acceptType, boomwrap(route), transformer);
     }
     
     public static synchronized void get(String path, String acceptType, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.get, path, acceptType, null, null, route, engine);
         Spark.get(path, acceptType, boomwrap(route), engine);
     }
     
     public static synchronized void get(String path, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.get, path, null, null, null, route, engine);
         Spark.get(path, boomwrap(route), engine);
     }
 
     public static synchronized void head(final String path, final Route route) {
+        addingRoute(HttpMethod.head, path, null, route, null, null, null);
         Spark.head(path, boomwrap(route));
     }
     
     public static synchronized void head(final String path, final BoomRoute route) {
+        addingRoute(HttpMethod.head, path, null, route, null, null, null);
         Spark.head(path, boomwrap(route));
     }
     
     public static synchronized void head(String path, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.head, path, null, route, transformer, null, null);
         Spark.head(path, boomwrap(route), transformer);
     }
     
     public static synchronized void head(String path, String acceptType, Route route) {
+        addingRoute(HttpMethod.head, path, acceptType, route, null, null, null);
         Spark.head(path, acceptType, boomwrap(route));
     }
     
     public static synchronized void head(String path, String acceptType, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.head, path, acceptType, route, transformer, null, null);
         Spark.head(path, acceptType, boomwrap(route), transformer);
     }
     
     public static synchronized void head(String path, String acceptType, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.head, path, acceptType, null, null, route, engine);
         Spark.head(path, acceptType, boomwrap(route), engine);
     }
     
     public static synchronized void head(String path, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.head, path, null, null, null, route, engine);
         Spark.head(path, boomwrap(route), engine);
     }
 
     public static synchronized void options(final String path, final Route route) {
+        addingRoute(HttpMethod.options, path, null, route, null, null, null);
         Spark.options(path, boomwrap(route));
     }
     
     public static synchronized void options(final String path, final BoomRoute route) {
+        addingRoute(HttpMethod.options, path, null, route, null, null, null);
         Spark.options(path, boomwrap(route));
     }
     
     public static synchronized void options(String path, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.options, path, null, route, transformer, null, null);
         Spark.options(path, boomwrap(route), transformer);
     }
     
     public static synchronized void options(String path, String acceptType, Route route) {
+        addingRoute(HttpMethod.options, path, acceptType, route, null, null, null);
         Spark.options(path, acceptType, boomwrap(route));
     }
     
     public static synchronized void options(String path, String acceptType, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.options, path, acceptType, route, transformer, null, null);
         Spark.options(path, acceptType, boomwrap(route), transformer);
     }
     
     public static synchronized void options(String path, String acceptType, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.options, path, acceptType, null, null, route, engine);
         Spark.options(path, acceptType, boomwrap(route), engine);
     }
     
     public static synchronized void options(String path, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.options, path, null, null, null, route, engine);
         Spark.options(path, boomwrap(route), engine);
     }
 
     public static synchronized void patch(final String path, final Route route) {
+        addingRoute(HttpMethod.patch, path, null, route, null, null, null);
         Spark.patch(path, boomwrap(route));
     }
     
     public static synchronized void patch(final String path, final BoomRoute route) {
+        addingRoute(HttpMethod.patch, path, null, route, null, null, null);
         Spark.patch(path, boomwrap(route));
     }
     
     public static synchronized void patch(String path, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.patch, path, null, route, transformer, null, null);
         Spark.patch(path, boomwrap(route), transformer);
     }
     
     public static synchronized void patch(String path, String acceptType, Route route) {
+        addingRoute(HttpMethod.patch, path, acceptType, route, null, null, null);
         Spark.patch(path, acceptType, boomwrap(route));
     }
     
     public static synchronized void patch(String path, String acceptType, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.patch, path, acceptType, route, transformer, null, null);
         Spark.patch(path, acceptType, boomwrap(route), transformer);
     }
     
     public static synchronized void patch(String path, String acceptType, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.patch, path, acceptType, null, null, route, engine);
         Spark.patch(path, acceptType, boomwrap(route), engine);
     }
     
     public static synchronized void patch(String path, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.patch, path, null, null, null, route, engine);
         Spark.patch(path, boomwrap(route), engine);
     }
 
     public static synchronized void post(final String path, final Route route) {
+        addingRoute(HttpMethod.post, path, null, route, null, null, null);
         Spark.post(path, boomwrap(route));
     }
     
     public static synchronized void post(final String path, final BoomRoute route) {
+        addingRoute(HttpMethod.post, path, null, route, null, null, null);
         Spark.post(path, boomwrap(route));
     }
     
     public static synchronized void post(String path, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.post, path, null, route, transformer, null, null);
         Spark.post(path, boomwrap(route), transformer);
     }
     
     public static synchronized void post(String path, String acceptType, Route route) {
+        addingRoute(HttpMethod.post, path, acceptType, route, null, null, null);
         Spark.post(path, acceptType, boomwrap(route));
     }
     
     public static synchronized void post(String path, String acceptType, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.post, path, acceptType, route, transformer, null, null);
         Spark.post(path, acceptType, boomwrap(route), transformer);
     }
     
     public static synchronized void post(String path, String acceptType, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.post, path, acceptType, null, null, route, engine);
         Spark.post(path, acceptType, boomwrap(route), engine);
     }
     
     public static synchronized void post(String path, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.post, path, null, null, null, route, engine);
         Spark.post(path, boomwrap(route), engine);
     }
 
     public static synchronized void put(final String path, final Route route) {
+        addingRoute(HttpMethod.put, path, null, route, null, null, null);
         Spark.put(path, boomwrap(route));
     }
     
     public static synchronized void put(final String path, final BoomRoute route) {
+        addingRoute(HttpMethod.put, path, null, route, null, null, null);
         Spark.put(path, boomwrap(route));
     }
     
     public static synchronized void put(String path, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.put, path, null, route, transformer, null, null);
         Spark.put(path, boomwrap(route), transformer);
     }
     
     public static synchronized void put(String path, String acceptType, Route route) {
+        addingRoute(HttpMethod.put, path, acceptType, route, null, null, null);
         Spark.put(path, acceptType, boomwrap(route));
     }
     
     public static synchronized void put(String path, String acceptType, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.put, path, acceptType, route, transformer, null, null);
         Spark.put(path, acceptType, boomwrap(route), transformer);
     }
     
     public static synchronized void put(String path, String acceptType, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.put, path, acceptType, null, null, route, engine);
         Spark.put(path, acceptType, boomwrap(route), engine);
     }
     
     public static synchronized void put(String path, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.put, path, null, null, null, route, engine);
         Spark.put(path, boomwrap(route), engine);
     }
 
     public static synchronized void trace(final String path, final Route route) {
+        addingRoute(HttpMethod.trace, path, null, route, null, null, null);
         Spark.trace(path, boomwrap(route));
     }
     
     public static synchronized void trace(final String path, final BoomRoute route) {
+        addingRoute(HttpMethod.trace, path, null, route, null, null, null);
         Spark.trace(path, boomwrap(route));
     }
     
     public static synchronized void trace(String path, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.trace, path, null, route, transformer, null, null);
         Spark.trace(path, boomwrap(route), transformer);
     }
     
     public static synchronized void trace(String path, String acceptType, Route route) {
+        addingRoute(HttpMethod.trace, path, acceptType, route, null, null, null);
         Spark.trace(path, acceptType, boomwrap(route));
     }
     
     public static synchronized void trace(String path, String acceptType, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.trace, path, acceptType, route, transformer, null, null);
         Spark.trace(path, acceptType, boomwrap(route), transformer);
     }
     
     public static synchronized void trace(String path, String acceptType, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.trace, path, acceptType, null, null, route, engine);
         Spark.trace(path, acceptType, boomwrap(route), engine);
     }
     
     public static synchronized void trace(String path, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.trace, path, null, null, null, route, engine);
         Spark.trace(path, boomwrap(route), engine);
     }
 

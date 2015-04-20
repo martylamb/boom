@@ -19,32 +19,40 @@ echo "// $DELIM" >> $OUT
 
 # insert http-method-specific methods
 for METHOD in connect delete get head options patch post put trace; do
+
 cat <<EOF >> $OUT
     public static synchronized void ${METHOD}(final String path, final Route route) {
+        addingRoute(HttpMethod.${METHOD}, path, null, route, null, null, null);
         Spark.${METHOD}(path, boomwrap(route));
     }
     
-    public static synchronized void ${METHOD}(final String path, final SimpleRoute route) {
+    public static synchronized void ${METHOD}(final String path, final BoomRoute route) {
+        addingRoute(HttpMethod.${METHOD}, path, null, route, null, null, null);
         Spark.${METHOD}(path, boomwrap(route));
     }
     
     public static synchronized void ${METHOD}(String path, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.${METHOD}, path, null, route, transformer, null, null);
         Spark.${METHOD}(path, boomwrap(route), transformer);
     }
     
     public static synchronized void ${METHOD}(String path, String acceptType, Route route) {
+        addingRoute(HttpMethod.${METHOD}, path, acceptType, route, null, null, null);
         Spark.${METHOD}(path, acceptType, boomwrap(route));
     }
     
     public static synchronized void ${METHOD}(String path, String acceptType, Route route, ResponseTransformer transformer) {
+        addingRoute(HttpMethod.${METHOD}, path, acceptType, route, transformer, null, null);
         Spark.${METHOD}(path, acceptType, boomwrap(route), transformer);
     }
     
     public static synchronized void ${METHOD}(String path, String acceptType, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.${METHOD}, path, acceptType, null, null, route, engine);
         Spark.${METHOD}(path, acceptType, boomwrap(route), engine);
     }
     
     public static synchronized void ${METHOD}(String path, TemplateViewRoute route, TemplateEngine engine) {
+        addingRoute(HttpMethod.${METHOD}, path, null, null, null, route, engine);
         Spark.${METHOD}(path, boomwrap(route), engine);
     }
 
