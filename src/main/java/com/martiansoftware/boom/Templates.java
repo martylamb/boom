@@ -40,7 +40,7 @@ class Templates {
             main = new DumbLazyClasspathTemplateStore("/templates", d);            
         }        
         DumbTemplateStore defaults = new DumbLazyClasspathTemplateStore("/boom-default-templates", d);
-        
+
         return new DumbTemplateStoreWithDefaults(main, defaults);
     }
 

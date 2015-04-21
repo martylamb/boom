@@ -102,6 +102,9 @@ public class Boom extends SparkBase {
      */
     public static Map<String, Object> context() { return _context.get(); }
 
+    public static void context(String key, Object value) { context().put(key, value); }
+    public static Object context(String key) { return context().get(key); }
+    
     // simple redirect shorthand - makes it easier to redirect from a simpleroute
     public static Object redirect(String location, int statusCode) { response().redirect(location, statusCode); return null; }
     public static Object redirect(String location) { response().redirect(location); return null; }
@@ -117,9 +120,20 @@ public class Boom extends SparkBase {
     // straight passthrough to Spark methods
     public static ModelAndView modelAndView(Object model, String viewName) { return Spark.modelAndView(model, viewName); }
     public static void halt() { Spark.halt(); }
-    public static void halt(int status) { Spark.halt(status); }
+    public static void halt(int status) { Spark.halt(status); } // TODO: lookup standard messages
     public static void halt(int status, String body) { Spark.halt(status, body); }
+//        context("status", status);
+//        context("body", body); // TODO: default body if null
+//        
+//    // TODO: look for status-specific page
+//        DumbTemplate t = Boom.template("/boom/status/" + status + ".html");
+//        if (t == null) t = Boom.template("/boom/status/default.html");
+//        Spark.halt(status, t.render(context()));
+//    }    
+    
     public static void halt(String body) { Spark.halt(body); }
+    
+    
     public static synchronized void exception(Class<? extends Exception> exceptionClass, ExceptionHandler handler) { Spark.exception(exceptionClass, handler); }
     
     public static void before(Filter filter) { Spark.before(filter); }

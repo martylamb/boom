@@ -37,21 +37,25 @@ private static Object doThing() {
 
 ## Debug Mode
 
-If the environment variable or system property BOOM_DEBUG is "1", then certain behaviors are modified so support development (described here and there below).
+If the environment variable or system property `BOOM_DEBUG` is "1", then certain behaviors are modified so support development (described here and there below).
 
 ## Static Content
 
-Static content is automatically configured to load from the classpath under /static-content.  For Maven projects, just put them into src/main/resources/static-content and it's all set up for you.  When your jar is bundled and delivered, static content will automatically be packaged and included by Maven.
+Static content is automatically configured to load from the classpath under /static-content.  For Maven projects, just put them into `src/main/resources/static-content` and it's all set up for you.  When your jar is bundled and delivered, static content will automatically be packaged and included by Maven.
 
-**If running in Debug Mode**, then static content is instead automatically configured to load from the filesystem under src/main/resources/static-content.  This allows reloading of content from the filesystem during development without restarting your application.
+**If running in Debug Mode**, then static content is instead automatically configured to load from the filesystem under `src/main/resources/static-content`.  This allows reloading of content from the filesystem during development without restarting your application.
 
 ## Templates
 
 You can use Spark's built-in template functionality, but Boom provides helpers for use with [DumbTemplates](https://github.com/martylamb/dumbtemplates).  Template can be obtained from Boom via template(templateName).
 
-Behavior is similar to that for static content: templates are automatically configured to load from the classpath under /templates.  For Maven projects, just put them into src/main/resources/templates and it's all set up for you.  When your jar is bundled and delivered, templates will be automatically packaged and included by Maven.
+Behavior is similar to that for static content: templates are automatically configured to load from the classpath under `/templates`.  For Maven projects, just put them into `src/main/resources/templates` and it's all set up for you.  When your jar is bundled and delivered, templates will be automatically packaged and included by Maven.
 
-**If running in Debug Mode**, then templates are instead automatically configured to load from the filesystem under src/main/resources/templates.  This allows reloading of templates from the filesystem during development without restarting your application.
+**If running in Debug Mode**, then templates are instead automatically configured to load from the filesystem under `src/main/resources/templates`.  This allows reloading of templates from the filesystem during development without restarting your application.
+
+## Custom Error/Status Pages
+
+To customize the html returned on exceptions or halts, use [DumbTemplates](https://github.com/martylamb/dumbtemplates) in your classpath under `/templates/boom/status/CODE.html`, where CODE is the status code for which you are customizing the output.  For example, for a custom Error 503 page, use `/templates/boom/status/503.html`.  If no template is found, `/templates/boom/status/default.html` is then tried, so you can provide a general override if you like.  Boom will place "status" and "body" values in the template context.
 
 ## TODO
 
