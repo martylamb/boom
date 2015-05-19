@@ -33,13 +33,13 @@ public class BoomResponse {
     public BoomResponse body(File f) throws IOException { 
         bodyStream = new BufferedInputStream(new FileInputStream(f));
         bodyString = null;
-        mimeType(MimeType.forFilename(f.getName()));
+        as(MimeType.forFilename(f.getName()));
         return this;
     }
     public BoomResponse body(URL url) throws IOException {
         bodyStream = url.openStream();
         bodyString = null;
-        mimeType(MimeType.forFilename(url.getFile().replaceAll(".*/", "")));
+        as(MimeType.forFilename(url.getFile().replaceAll(".*/", "")));
         return this;
     }
     
@@ -50,29 +50,9 @@ public class BoomResponse {
     public BoomResponse notFound() { return status(HttpServletResponse.SC_NOT_FOUND); }
     public BoomResponse unauthorized() { return status(HttpServletResponse.SC_UNAUTHORIZED); }
     
-    public BoomResponse mimeType(String type) { mimeType = type; return this; }
-    public BoomResponse mimeType(MimeType type) { mimeType = type.toString(); return this; }
-    
-    // simple helpers for fluent assignment of common mime types
-    public BoomResponse binary() { return mimeType(MimeType.BIN); }
-    public BoomResponse javascript() { return mimeType(MimeType.JS); }
-    public BoomResponse css() { return mimeType(MimeType.CSS); }
-    public BoomResponse html() { return mimeType(MimeType.HTML); }
-    public BoomResponse text() { return mimeType(MimeType.TXT); }
-    public BoomResponse csv() { return mimeType(MimeType.CSV); }
-    public BoomResponse xml() { return mimeType(MimeType.XML); }
-    public BoomResponse json() { return mimeType(MimeType.JSON); }
-    
-    // compound helpers for concise common use cases
-    public BoomResponse html(String html) { body(html); return html(); }
-    public BoomResponse json(String json) { body(json); return json(); }
-    public BoomResponse json(Object jobj) { body(Json.toJson(jobj)); return json(); }
-    
-    public BoomResponse text(String text) { body(text); return text(); }
-    public BoomResponse xml(String xml) { body(xml); return xml(); }
-    public BoomResponse binary(byte[] b) { body(new ByteArrayInputStream(b)); return binary(); }
-    public BoomResponse binary(byte[] b, int offset, int len) { body(new ByteArrayInputStream(b, offset, len)); return binary(); }
-    
+    public BoomResponse as(String type) { mimeType = type; return this; }
+    public BoomResponse as(MimeType type) { mimeType = type.toString(); return this; }
+        
     Object respond(Response rsp) throws IOException {
         rsp.status(status);
         rsp.type(mimeType);

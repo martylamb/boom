@@ -32,6 +32,6 @@ public class StatusPage {
         if (t == null) t = template("/boom/status/default.html");
         return new BoomResponse(t.render(context()))
                                         .status(status)
-                                        .mimeType(MimeType.HTML);
+                                        .as(MimeType.HTML);
     }
 }
