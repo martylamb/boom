@@ -19,9 +19,8 @@ class RouteWrapper implements Route {
     
     @Override
     public Object handle(Request rqst, Response rspns) throws Exception {
-        Object result = null;
         try {
-            result = _wrapped.handle(rqst, rspns);
+            Object result = _wrapped.handle(rqst, rspns);
             if (result instanceof BoomResponse) {
                 result = ((BoomResponse) result).respond(rspns);
             }
