@@ -4,6 +4,8 @@ import com.martiansoftware.dumbtemplates.DumbTemplate;
 import com.martiansoftware.dumbtemplates.DumbTemplateStore;
 import java.util.Locale;
 import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.ExceptionHandler;
@@ -95,6 +97,13 @@ public class Boom extends SparkBase {
      * @param cf the ContextFactory to use for all requests
      */
     public static void contextFactory(ContextFactory cf) { _contextFactory = cf; }
+    
+    public static ResourceBundle r(String bundleName) {
+        ResourceBundle result = null;
+        try { ResourceBundle.getBundle("bundles." + bundleName); } catch (MissingResourceException ohWell) {};
+        if (result == null) result = ResourceBundle.getBundle("boom-default-bundles." + bundleName);
+        return result;
+    }
     
     /**
      * Returns the working template context

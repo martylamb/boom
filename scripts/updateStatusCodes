@@ -6,12 +6,14 @@ if [ ! -f pom.xml ]; then
 fi
 
 REGISTRY="https://www.iana.org/assignments/http-status-codes/http-status-codes.txt"
-OUT="target/scripts/http-status-codes.txt"
-mkdir -p `dirname $OUT`
+TMP="target/scripts/http-status-codes.txt"
+mkdir -p `dirname $TMP`
 
-if [ ! -f $OUT ]; then
-	curl $REGISTRY > $OUT
+if [ ! -f $TMP ]; then
+	curl $REGISTRY > $TMP
 fi
 
-egrep -i "^ +[0-9]{3} +[a-z]" $OUT | sed -e 's/ *\[.*//' -e 's/^ \+//' -e 's/ \+/=/' -e 's/ *$//'
+OUT="src/main/resources/boom-default-bundles/httpstatus.properties"
+mkdir -p `dirname $OUT`
+egrep -i "^ +[0-9]{3} +[a-z]" $TMP | sed -e 's/ *\[.*//' -e 's/^ \+/SC_/' -e 's/ \+/=/' -e 's/ *$//' > $OUT
 

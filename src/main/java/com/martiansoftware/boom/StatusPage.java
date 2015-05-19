@@ -3,6 +3,7 @@ package com.martiansoftware.boom;
 
 import static com.martiansoftware.boom.Boom.*;
 import com.martiansoftware.dumbtemplates.DumbTemplate;
+import java.util.ResourceBundle;
 import javax.servlet.http.HttpServletResponse;
 import spark.HaltException;
 
@@ -21,8 +22,11 @@ public class StatusPage {
     }
     
     public static BoomResponse of(int status, String body) {
+        ResourceBundle rb = Boom.r("httpstatus");
+        String stext = rb.getString(String.format("SC_%d", status));
         context("status", status);
-        context("body", body); // TODO: populate from standard status code messages if necessary.  Also set as title.
+        context("title", String.format("%d %s", status, stext == null ? "" : stext));
+        context("body", body == null ? stext : body);
         // TODO: add stack trace if debug and status==500
         DumbTemplate t = template(String.format("/boom/status/%d.html", status));
         if (t == null) t = template("/boom/status/default.html");
