@@ -2,6 +2,10 @@ package com.martiansoftware.boom;
 
 import com.martiansoftware.dumbtemplates.DumbTemplate;
 import com.martiansoftware.dumbtemplates.DumbTemplateStore;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -32,13 +36,10 @@ public class Boom extends SparkBase {
     private static final Logger log = LoggerFactory.getLogger(Boom.class);
     private static final boolean _debug;
     
-    private static final ThreadLocal<Request> _request = new ThreadLocal<>();
-    private static final ThreadLocal<Response> _response = new ThreadLocal<>();
+    private static final ThreadLocal<BoomContext> _context = new ThreadLocal<>();
     
-    private static ContextFactory _contextFactory = java.util.HashMap::new;
+    private static ContextFactory _templateContextFactory = java.util.HashMap::new;
 
-    private static final ThreadLocal<Map<String, Object>> _context = new ThreadLocal<>();
-    
     private static final DumbTemplateStore _templates;
     private static final PathResolver _pathResolver = new PathResolver("/");
     
@@ -69,13 +70,13 @@ public class Boom extends SparkBase {
      * Returns the Spark Request that is currently being serviced
      * @return the Spark Request that is currently being serviced
      */
-    public static Request request() { return _request.get(); }
+    public static Request request() { return _context.get().request; }
 
     /**
      * Returns the Spark Response that is currently being serviced
      * @return the Spark Response that is currently being serviced
     */
-    public static Response response() { return _response.get(); }
+    public static Response response() { return _context.get().response; }
     
     public static String resolvePath(String path) { return _pathResolver.resolve(path).toString(); }
 
@@ -96,7 +97,7 @@ public class Boom extends SparkBase {
      * Specify a ContextFactory to provide a preinitialized or otherwise specialized context
      * @param cf the ContextFactory to use for all requests
      */
-    public static void contextFactory(ContextFactory cf) { _contextFactory = cf; }
+    public static void contextFactory(ContextFactory cf) { _templateContextFactory = cf; }
     
     public static ResourceBundle r(String bundleName) {
         ResourceBundle result = null;
@@ -109,7 +110,7 @@ public class Boom extends SparkBase {
      * Returns the working template context
      * @return the working template context
      */
-    public static Map<String, Object> context() { return _context.get(); }
+    public static Map<String, Object> context() { return _context.get().templateContext; }
 
     public static void context(String key, Object value) { context().put(key, value); }
     public static Object context(String key) { return context().get(key); }
@@ -174,13 +175,9 @@ public class Boom extends SparkBase {
 
     private static void initThreadLocalsFilter() {
         Spark.before((Request req, Response rsp) -> {
-            _request.set(req);
-            _response.set(rsp);
-            
-            Map<String, Object> ctx = _contextFactory.createContext(); // use optional?
-            if (ctx == null) ctx = new java.util.HashMap<String, Object>();
-            ctx.put(Constants.BOOM_ROOT, _pathResolver.resolve("/"));
-            _context.set(ctx);
+            Map<String, Object> tctx = _templateContextFactory.createContext();
+            tctx.put(Constants.BOOM_ROOT, _pathResolver.resolve("/"));
+            _context.set(new BoomContext(req, rsp, tctx));            
         });        
     }
     
@@ -199,6 +196,27 @@ public class Boom extends SparkBase {
         StackTraceElement[] stack = Thread.currentThread().getStackTrace();
         log.debug("Adding route for {} {} from {}", method, path, stack[3]);
     }
+    
+    public BoomResponse binary(InputStream in) { return new BoomResponse(in).as(MimeType.BIN); }
+    public BoomResponse binary(File f) throws IOException { return new BoomResponse(f).as(MimeType.BIN); }
+    public BoomResponse binary(byte[] b) { return new BoomResponse(new ByteArrayInputStream(b)).as(MimeType.BIN); }
+    public BoomResponse binary(byte[] b, int offset, int len) { return new BoomResponse(new ByteArrayInputStream(b, offset, len)).as(MimeType.BIN); }
+    
+    public BoomResponse html(InputStream in) { return new BoomResponse(in).as(MimeType.HTML); }
+    public BoomResponse html(File f) throws IOException { return new BoomResponse(f).as(MimeType.HTML); }
+    public BoomResponse html(String s) { return new BoomResponse(s).as(MimeType.HTML); }
+    
+    public BoomResponse json(Object o) { return new BoomResponse(Json.toJson(o)).as(MimeType.JSON); }
+
+    public BoomResponse text(InputStream in) { return new BoomResponse(in).as(MimeType.TXT); }
+    public BoomResponse text(File f) throws IOException { return new BoomResponse(f).as(MimeType.TXT); }
+    public BoomResponse text(String s) { return new BoomResponse(s).as(MimeType.TXT); }
+    
+    public BoomResponse xml(InputStream in) { return new BoomResponse(in).as(MimeType.XML); }
+    public BoomResponse xml(File f) throws IOException { return new BoomResponse(f).as(MimeType.XML); }
+    public BoomResponse xml(String s) { return new BoomResponse(s).as(MimeType.XML); }
+    
+    
     
 // the below is created by scripts/updateBoomJava    
 // ## BEGIN GENERATED CODE - DO NOT EDIT BELOW THIS LINE ##
