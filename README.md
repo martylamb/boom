@@ -11,7 +11,7 @@ Use com.martiansoftware.boom.Boom in place of spark.Spark for additional functio
 
 ## BoomRoute
 
-When registering Routes (e.g., Spark's get() and post() methods), you can alternately specify a BoomRoute, which takes no arguments.  Spark's Request and Response objects for the current Thread are made available by Boom's request() and response() methods, so your BoomRoute implementations can do this (assuming static method App.doThing()):
+When registering Routes (e.g., Spark's get() and post() methods), you can alternately specify a BoomRoute, which takes no arguments and returns an Object.  Spark's Request and Response objects for the current Thread are made available by Boom's request() and response() methods, so your BoomRoute implementations can do this (assuming static method App.doThing()):
 
 ```java
 get("/thing", App::doThing);
@@ -26,7 +26,7 @@ get("/thing", (req,rsp) -> App.doThing(req,rsp));
 
 Routes (and BoomRoutes) can continue return any type of Object for Spark to render to the client.  But if you return a BoomResponse then a number of things are taken care of for you automatically.
 
-The BoomResponse() constructor can take a String, InputStream, File, or URL as an argument.  In each case you will get what you expect; the InputStream (or file or URL contents, etc.) will be copied to the client.  Since Files and URLs may have file extensions, Boom will set the appropriate MIME type as well.
+The BoomResponse() constructor can take a String, InputStream, File, or URL as an argument.  In each case you will get what you expect; the InputStream (or String, File, or URL contents, etc.) will be copied to the client.  If a File or URL has a file extension, Boom will set the appropriate MIME type as well.
 
 Type helpers and a fluent interface allow a single call to performa multiple tasks like:
 ```java
@@ -42,13 +42,32 @@ private static Object getThing() {
 }
 ```
 
+```java
+private static Object getFile() {
+	return binary(myFile);
+}
+```
+
+```java
+private static Object getXml() {
+	return xml(something.getXmlInputStream());
+}
+```
+
+```java
+private static Object getText() {
+	return text("just plain old text here...");
+}
+```
+
+
 ## Debug Mode
 
-If the environment variable or system property `BOOM_DEBUG` is "1", then certain behaviors are modified so support development (described here and there below).
+If the environment variable or system property `BOOM_DEBUG` is "1", then certain behaviors are modified to support development (described here and there below).
 
 ## Static Content
 
-Static content is automatically configured to load from the classpath under /static-content.  For Maven projects, just put them into `src/main/resources/static-content` and it's all set up for you.  When your jar is bundled and delivered, static content will automatically be packaged and included by Maven.
+Static content is automatically configured to load from the classpath under /static-content.  For Maven projects, just put static content files into `src/main/resources/static-content` and it's all set up for you.  When your jar is bundled and delivered, static content will automatically be packaged and included by Maven.
 
 **If running in Debug Mode**, then static content is instead automatically configured to load from the filesystem under `src/main/resources/static-content` instead of from your classpath.  This allows reloading of content from the filesystem during development without restarting your application.
 
