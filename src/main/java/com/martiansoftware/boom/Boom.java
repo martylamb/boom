@@ -198,25 +198,25 @@ public class Boom extends SparkBase {
     }
     
     // a whole bunch of convenient methods for creating BoomResponses of various typs
-    public BoomResponse binary(InputStream in) { return new BoomResponse(in).as(MimeType.BIN); }
-    public BoomResponse binary(File f) throws IOException { return new BoomResponse(f).as(MimeType.BIN); }
-    public BoomResponse binary(byte[] b) { return new BoomResponse(new ByteArrayInputStream(b)).as(MimeType.BIN); }
-    public BoomResponse binary(byte[] b, int offset, int len) { return new BoomResponse(new ByteArrayInputStream(b, offset, len)).as(MimeType.BIN); }
+    public static BoomResponse binary(InputStream in) { return new BoomResponse(in).as(MimeType.BIN); }
+    public static BoomResponse binary(File f) throws IOException { return new BoomResponse(f).as(MimeType.BIN); }
+    public static BoomResponse binary(byte[] b) { return new BoomResponse(new ByteArrayInputStream(b)).as(MimeType.BIN); }
+    public static BoomResponse binary(byte[] b, int offset, int len) { return new BoomResponse(new ByteArrayInputStream(b, offset, len)).as(MimeType.BIN); }
     
-    public BoomResponse html(InputStream in) { return new BoomResponse(in).as(MimeType.HTML); }
-    public BoomResponse html(File f) throws IOException { return new BoomResponse(f).as(MimeType.HTML); }
-    public BoomResponse html(String s) { return new BoomResponse(s).as(MimeType.HTML); }
+    public static BoomResponse html(InputStream in) { return new BoomResponse(in).as(MimeType.HTML); }
+    public static BoomResponse html(File f) throws IOException { return new BoomResponse(f).as(MimeType.HTML); }
+    public static BoomResponse html(String s) { return new BoomResponse(s).as(MimeType.HTML); }
     
-    public BoomResponse json(Object o) { return new BoomResponse(Json.toJson(o)).as(MimeType.JSON); }
-    public BoomResponse json(String s) { return new BoomResponse(s).as(MimeType.JSON); }
+    public static BoomResponse json(Object o) { return new BoomResponse(Json.toJson(o)).as(MimeType.JSON); }
+    public static BoomResponse json(String s) { return new BoomResponse(s).as(MimeType.JSON); }
     
-    public BoomResponse text(InputStream in) { return new BoomResponse(in).as(MimeType.TXT); }
-    public BoomResponse text(File f) throws IOException { return new BoomResponse(f).as(MimeType.TXT); }
-    public BoomResponse text(String s) { return new BoomResponse(s).as(MimeType.TXT); }
+    public static BoomResponse text(InputStream in) { return new BoomResponse(in).as(MimeType.TXT); }
+    public static BoomResponse text(File f) throws IOException { return new BoomResponse(f).as(MimeType.TXT); }
+    public static BoomResponse text(String s) { return new BoomResponse(s).as(MimeType.TXT); }
     
-    public BoomResponse xml(InputStream in) { return new BoomResponse(in).as(MimeType.XML); }
-    public BoomResponse xml(File f) throws IOException { return new BoomResponse(f).as(MimeType.XML); }
-    public BoomResponse xml(String s) { return new BoomResponse(s).as(MimeType.XML); }
+    public static BoomResponse xml(InputStream in) { return new BoomResponse(in).as(MimeType.XML); }
+    public static BoomResponse xml(File f) throws IOException { return new BoomResponse(f).as(MimeType.XML); }
+    public static BoomResponse xml(String s) { return new BoomResponse(s).as(MimeType.XML); }
     
     
     
