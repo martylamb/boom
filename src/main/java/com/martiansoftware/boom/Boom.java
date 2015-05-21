@@ -123,7 +123,7 @@ public class Boom extends SparkBase {
     public static DumbTemplate template(String templatePath) { return _templates.get(templatePath); }
     public static DumbTemplateStore templateStore() { return _templates; }
 
-    // TODO: client-side sessions
+    // TODO: clientSession() for play-framework-like remote sessions
     public static Session session(boolean create) { return request().session(create); }
     public static Session session() { return session(true); }
 
@@ -197,6 +197,7 @@ public class Boom extends SparkBase {
         log.debug("Adding route for {} {} from {}", method, path, stack[3]);
     }
     
+    // a whole bunch of convenient methods for creating BoomResponses of various typs
     public BoomResponse binary(InputStream in) { return new BoomResponse(in).as(MimeType.BIN); }
     public BoomResponse binary(File f) throws IOException { return new BoomResponse(f).as(MimeType.BIN); }
     public BoomResponse binary(byte[] b) { return new BoomResponse(new ByteArrayInputStream(b)).as(MimeType.BIN); }
@@ -207,7 +208,8 @@ public class Boom extends SparkBase {
     public BoomResponse html(String s) { return new BoomResponse(s).as(MimeType.HTML); }
     
     public BoomResponse json(Object o) { return new BoomResponse(Json.toJson(o)).as(MimeType.JSON); }
-
+    public BoomResponse json(String s) { return new BoomResponse(s).as(MimeType.JSON); }
+    
     public BoomResponse text(InputStream in) { return new BoomResponse(in).as(MimeType.TXT); }
     public BoomResponse text(File f) throws IOException { return new BoomResponse(f).as(MimeType.TXT); }
     public BoomResponse text(String s) { return new BoomResponse(s).as(MimeType.TXT); }

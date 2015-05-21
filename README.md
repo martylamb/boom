@@ -22,16 +22,23 @@ instead of this:
 get("/thing", (req,rsp) -> App.doThing(req,rsp));
 ```
 
-## BoomResult
+## BoomResponse
 
-Routes (and BoomRoutes) can continue return any type of Object for Spark to render to the client.  But if you return a BoomResult then a number of things are taken care of for you automatically.
+Routes (and BoomRoutes) can continue return any type of Object for Spark to render to the client.  But if you return a BoomResponse then a number of things are taken care of for you automatically.
 
-The BoomResponse() constructor can take a String, InputStream, File, or URL as an argument.  In each case you will get what you expect; the InputStream will be copied to the client, or the File's contents, or even the contents at the URL.  Since Files and URLs may have file extensions, Boom will set the appropriate MimeType as well.
+The BoomResponse() constructor can take a String, InputStream, File, or URL as an argument.  In each case you will get what you expect; the InputStream (or file or URL contents, etc.) will be copied to the client.  Since Files and URLs may have file extensions, Boom will set the appropriate MIME type as well.
 
 Type helpers and a fluent interface allow a single call to performa multiple tasks like:
 ```java
 private static Object doThing() {
-	return new BoomResult("{'thing':'done'}").json();
+	return new BoomResponse("{'thing':'done'}").json();
+}
+```
+
+Boom provides some static methods for easier construction and initialization of BoomResponses as well:
+```java
+private static Object getThing() {
+	return json(myThing); // automatically json-ifies myThing and sets the MIME type appropriately.
 }
 ```
 
@@ -43,15 +50,21 @@ If the environment variable or system property `BOOM_DEBUG` is "1", then certain
 
 Static content is automatically configured to load from the classpath under /static-content.  For Maven projects, just put them into `src/main/resources/static-content` and it's all set up for you.  When your jar is bundled and delivered, static content will automatically be packaged and included by Maven.
 
-**If running in Debug Mode**, then static content is instead automatically configured to load from the filesystem under `src/main/resources/static-content`.  This allows reloading of content from the filesystem during development without restarting your application.
+**If running in Debug Mode**, then static content is instead automatically configured to load from the filesystem under `src/main/resources/static-content` instead of from your classpath.  This allows reloading of content from the filesystem during development without restarting your application.
 
 ## Templates
 
-You can use Spark's built-in template functionality, but Boom provides helpers for use with [DumbTemplates](https://github.com/martylamb/dumbtemplates).  Template can be obtained from Boom via template(templateName).
+You can use Spark's built-in template functionality (or whatever else you'd like to use), but Boom provides helpers for use with [DumbTemplates](https://github.com/martylamb/dumbtemplates).  Template can be obtained from Boom via `template(templateName)`.
 
 Behavior is similar to that for static content: templates are automatically configured to load from the classpath under `/templates`.  For Maven projects, just put them into `src/main/resources/templates` and it's all set up for you.  When your jar is bundled and delivered, templates will be automatically packaged and included by Maven.
 
-**If running in Debug Mode**, then templates are instead automatically configured to load from the filesystem under `src/main/resources/templates`.  This allows reloading of templates from the filesystem during development without restarting your application.
+**If running in Debug Mode**, then templates are instead automatically configured to load from the filesystem under `src/main/resources/templates` instead of from your classpath.  This allows reloading of templates from the filesystem during development without restarting your application.
+
+## Resource Bundles
+
+Boom provides a helper method for loading ResourceBundles.  If you store your bundles in the classpath under `/bundles`, then Boom's `r(bundlename)` will retrieve it for you.  For Maven projects, put them into `src/main/resources/bundles`.
+
+A future update will store end user locale information in the session and use that to load the appropriate bundle automatically.  Of course, you'll be able to manually set the user's locale as well.
 
 ## Custom Error/Status Pages
 
@@ -61,10 +74,10 @@ To customize the html returned on exceptions or halts, use [DumbTemplates](https
 
 A bunch of things remain planned:
 
-  * Authentication Filter
-  * Automatic CSRF protection
+  * Authentication Filter (already done in another project, needs to be extracted and cleaned up)
+  * Automatic CSRF protection (already done as above)
   * i18n
-  * separate jars bundling existing static content (e.g. jquery, font-awesome, etc.)
+  * maybe provide separate jars bundling existing static content (e.g. jquery, font-awesome, etc.) or use WebJars
   * Maven project archetype
   * Debug-mode use of external tools like request.bin or other http test endpoints
   
