@@ -46,4 +46,11 @@
         </dependency>
                 
     </dependencies>
+    
+    <distributionManagement>
+        <repository>
+            <id>mvn.martiansoftware.com</id>
+            <url>ftp://mvn.martiansoftware.com</url>
+        </repository>
+    </distributionManagement>    
 </project>
