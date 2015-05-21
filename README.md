@@ -38,24 +38,29 @@ private static Object doThing() {
 Boom provides some static methods for easier construction and initialization of BoomResponses as well:
 ```java
 private static Object getThing() {
-	return json(myThing); // automatically json-ifies myThing and sets the MIME type appropriately.
+	// json-ification is automatic
+	// mime type set to "application/json"
+	return json(someObject);
 }
 ```
 
 ```java
 private static Object getFile() {
+	// mime type set to "application/octet-stream"
 	return binary(myFile);
 }
 ```
 
 ```java
 private static Object getXml() {
+	// mime type set to "text/xml"
 	return xml(something.getXmlInputStream());
 }
 ```
 
 ```java
 private static Object getText() {
+	// mime type set to "text/plain"
 	return text("just plain old text here...");
 }
 ```
