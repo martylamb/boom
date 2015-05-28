@@ -101,7 +101,7 @@ public class Boom extends SparkBase {
     
     public static ResourceBundle r(String bundleName) {
         ResourceBundle result = null;
-        try { ResourceBundle.getBundle("bundles." + bundleName); } catch (MissingResourceException ohWell) {};
+        try { result = ResourceBundle.getBundle("bundles." + bundleName); } catch (MissingResourceException ohWell) {};
         if (result == null) result = ResourceBundle.getBundle("boom-default-bundles." + bundleName);
         return result;
     }
