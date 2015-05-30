@@ -1,5 +1,6 @@
 package com.martiansoftware.boom;
 
+import com.martiansoftware.dumbtemplates.DumbTemplate;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -9,6 +10,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import javax.servlet.http.HttpServletResponse;
 import spark.Response;
+import static com.martiansoftware.boom.Boom.context;
 
 /**
  *
@@ -26,6 +28,7 @@ public class BoomResponse {
     public BoomResponse(String s) { body(s); }
     public BoomResponse(File f) throws IOException { body(f); }
     public BoomResponse(URL url) throws IOException { body(url); }
+    public BoomResponse(DumbTemplate t) { body(t.render(context())); }
     
     public BoomResponse body(InputStream in) { bodyStream = in; bodyString = null; return this; }
     public BoomResponse body(String s) { bodyStream = null; bodyString = s; return this; }

@@ -101,13 +101,13 @@ public class FormAuthFilter implements Filter {
     public Object logout() {
         log.info("{} logged out.", getUsername(request()));
         session().invalidate();
-        return template("/FormAuthFilter/loggedout.html").render(context()); // TODO: eliminate need for render call
+        return template("/FormAuthFilter/loggedout.html");
     }
     
     String showForm(String user) {
         try {
             // display the login form with no initial username
-            context().put("user", user == null ? "" : user);  // TODO: render nulls as empty strings
+            context("user", user == null ? "" : user);  // TODO: render nulls as empty strings
             return template("/FormAuthFilter/login.html").render(context());
         } catch (Exception e) {
             // TODO: return better error
