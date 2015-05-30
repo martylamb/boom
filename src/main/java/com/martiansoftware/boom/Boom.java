@@ -36,7 +36,7 @@ public class Boom extends SparkBase {
     private static final Logger log = LoggerFactory.getLogger(Boom.class);
     private static final boolean _debug;
     
-    private static final ThreadLocal<BoomContext> _context = new ThreadLocal<>();
+    private static final ThreadLocal<BoomContext> _boomContext = new ThreadLocal<>();
     
     private static ContextFactory _templateContextFactory = java.util.HashMap::new;
 
@@ -70,13 +70,13 @@ public class Boom extends SparkBase {
      * Returns the Spark Request that is currently being serviced
      * @return the Spark Request that is currently being serviced
      */
-    public static Request request() { return _context.get().request; }
+    public static Request request() { return _boomContext.get().request; }
 
     /**
      * Returns the Spark Response that is currently being serviced
      * @return the Spark Response that is currently being serviced
     */
-    public static Response response() { return _context.get().response; }
+    public static Response response() { return _boomContext.get().response; }
     
     public static String resolvePath(String path) { return _pathResolver.resolve(path).toString(); }
 
@@ -110,8 +110,7 @@ public class Boom extends SparkBase {
      * Returns the working template context
      * @return the working template context
      */
-    public static Map<String, Object> context() { return _context.get().templateContext; }
-
+    public static Map<String, Object> context() { return _boomContext.get().templateContext; }
     public static void context(String key, Object value) { context().put(key, value); }
     public static Object context(String key) { return context().get(key); }
     
@@ -177,7 +176,7 @@ public class Boom extends SparkBase {
         Spark.before((Request req, Response rsp) -> {
             Map<String, Object> tctx = _templateContextFactory.createContext();
             tctx.put(Constants.BOOM_ROOT, _pathResolver.resolve("/"));
-            _context.set(new BoomContext(req, rsp, tctx));            
+            _boomContext.set(new BoomContext(req, rsp, tctx));            
         });        
     }
     
