@@ -1,5 +1,6 @@
 package com.martiansoftware.boom;
 
+import com.martiansoftware.dumbtemplates.DumbTemplate;
 import spark.HaltException;
 import spark.Request;
 import spark.Response;
@@ -23,6 +24,8 @@ class RouteWrapper implements Route {
             Object result = _wrapped.handle(rqst, rspns);
             if (result instanceof BoomResponse) {
                 result = ((BoomResponse) result).respond(rspns);
+            } else if (result instanceof DumbTemplate) {
+                result = ((DumbTemplate) result).render(Boom.context());
             }
             return result;
         } catch (HaltException he) {
