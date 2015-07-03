@@ -6,6 +6,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -42,6 +43,8 @@ public class Boom extends SparkBase {
 
     private static final DumbTemplateStore _templates;
     private static final PathResolver _pathResolver = new PathResolver("/");
+    private static final List<Filter> _beforeFilters = new java.util.LinkedList<>();
+    private static final List<Filter> _afterFilters = new java.util.LinkedList<>();
     
     static {
         // TODO: allow port and static content to be done before routes are added.
@@ -144,15 +147,18 @@ public class Boom extends SparkBase {
     
     
     public static synchronized void exception(Class<? extends Exception> exceptionClass, ExceptionHandler handler) { Spark.exception(exceptionClass, handler); }
-    
-    public static void before(Filter filter) { Spark.before(filter); }
+        
+    public static void before(Filter filter) { _beforeFilters.add(filter); }
     public static void before(String path, Filter filter) { Spark.before(path, filter); }
     public static void before(String path, String acceptType, Filter filter) { Spark.before(path, acceptType, filter); }
+    public static boolean removeBefore(Filter filter) { return _beforeFilters.remove(filter); }
+    public static void clearBefore() { _beforeFilters.clear(); }
     
-    public static void after(Filter filter) { Spark.after(filter); }
+    public static void after(Filter filter) { _afterFilters.add(filter); }
     public static void after(String path, Filter filter) { Spark.after(path, filter); }
     public static void after(String path, String acceptType, Filter filter) { Spark.after(path, acceptType, filter); }
-    
+    public static boolean removeAfter(Filter filter) { return _afterFilters.remove(filter); }
+    public static void clearAfter() { _afterFilters.clear(); }
     
     protected static Route boomwrap(final Route route) {
         return new RouteWrapper(route);
@@ -160,8 +166,7 @@ public class Boom extends SparkBase {
     
     protected static TemplateViewRoute boomwrap(TemplateViewRoute route) {
         return route;
-    }
-    
+    }    
     
     // below methods set up all the static boom fun stuff
     static void initStaticContent() {
@@ -192,8 +197,18 @@ public class Boom extends SparkBase {
                                     TemplateViewRoute tvr,
                                     TemplateEngine engine) {
         
-        StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-        log.debug("Adding route for {} {} from {}", method, path, stack[3]);
+        if (log.isDebugEnabled()) {
+            StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+            log.debug("Adding route for {} {} from {}", method, path, stack[3]);
+            log.debug("Adding route with {} filter(s) before and {} after.", _beforeFilters.size(), _afterFilters.size());
+        }
+        if (acceptType == null) {            
+            _beforeFilters.stream().forEach(f -> Spark.before(path, f));
+            _afterFilters.stream().forEach(f -> Spark.after(path, f));
+        } else {
+            _beforeFilters.stream().forEach(f -> Spark.before(path, acceptType, f));
+            _afterFilters.stream().forEach(f -> Spark.after(path, acceptType, f));
+        }
     }
     
     // a whole bunch of convenient methods for creating BoomResponses of various typs
