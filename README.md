@@ -65,6 +65,11 @@ private static Object getText() {
 }
 ```
 
+## Before & After Filters
+
+Spark provides [before and after filters](http://sparkjava.com/documentation.html#filters) that allow you to process a request or response before and after a given route.  In spark, these are provided on a per-route basis.  Boom extends this to allow for global before and after filters via `before(Filter F)` and `after(Filter f)`.  The filters supplied to these methods are appended to Boom-global lists of before and after filters.  Whenever a new Route is added, the global before and after filters are first added for the path/acceptType of the new Route, and then the Spark method to add the Route is provided.
+
+These global filters can be removed via `removeBefore(Filter f)` and `removeAfter(Filter f)`, or can be completely reset via `clearBefore()` and `clearAfter()`.
 
 ## Debug Mode
 
@@ -102,6 +107,6 @@ A bunch of things remain planned:
   * Automatic CSRF protection (already done as above)
   * i18n
   * maybe provide separate jars bundling existing static content (e.g. jquery, font-awesome, etc.) or use WebJars
-  * Maven project archetype
+  * Maven project archetype or other project setup tool
   * Debug-mode use of external tools like request.bin or other http test endpoints
   
