@@ -65,12 +65,6 @@ private static Object getText() {
 }
 ```
 
-## Before & After Filters
-
-Spark provides [before and after filters](http://sparkjava.com/documentation.html#filters) that allow you to process a request or response before and after a given route.  In spark, these are provided on a per-route basis.  Boom extends this to allow for global before and after filters via `before(Filter F)` and `after(Filter f)`.  The filters supplied to these methods are appended to Boom-global lists of before and after filters.  Whenever a new Route is added, the global before and after filters are first added for the path/acceptType of the new Route, and then the Spark method to add the Route is provided.
-
-These global filters can be removed via `removeBefore(Filter f)` and `removeAfter(Filter f)`, or can be completely reset via `clearBefore()` and `clearAfter()`.
-
 ## Debug Mode
 
 If the environment variable or system property `BOOM_DEBUG` is "1", then certain behaviors are modified to support development (described here and there below).
@@ -99,12 +93,45 @@ A future update will store end user locale information in the session and use th
 
 To customize the html returned on exceptions or halts, use [DumbTemplates](https://github.com/martylamb/dumbtemplates) in your classpath under `/templates/boom/status/CODE.html`, where CODE is the status code for which you are customizing the output.  For example, for a custom Error 503 page, use `/templates/boom/status/503.html`.  If no template is found, `/templates/boom/status/default.html` is then tried, so you can provide a general override if you like.  Boom will place "status" and "body" values in the template context.
 
+## Authentication
+
+Boom provides form-based authentication (you're using SSL/TLS, right?)  Setting it up is easy but it does require a few steps.
+
+  1. Create an `Authenticator`.  This is a functional interface in `com.martiansoftware.boom.auth` that takes a username and passphrase and returns an authenticated `User` object (see `com.martiansoftware.boom.auth.User`) if login is successful, and returns null otherwise:
+```java
+public interface Authenticator {    
+    public User authenticate(String username, String passphrase);
+}
+```
+  2. Create a `FormAuthFilter`.  This is a class in `com.martiansoftware.boom.auth` that filters requests and presents a login page when required.  The default login page templates are in `boom-default-templates.FormAuthFilter` and can be customized by placing your own `FormAuthFilter/login.html` and `FormAuthFilter/loggedout.html` templates in your own template directory as described above.  Take a look at the default login.html form to see the appropriate query parameters and POST destination.  `FormAuthFilter`'s constructor takes a single argument: the `Authenticator` you created above in step 1.
+  3. Exempt any paths that DO NOT require authentication in the `FormAuthFilter` via its exempt() method.  This method returns the modified `FormAuthFilter` so it may be chained as follows:
+```java
+myFormAuthFilter.exempt("/favicon.ico").exempt("/styles.css").exempt("/images/logo.png");
+```
+  4. Tell Boom to use your `FormAuthFilter` via `Boom.auth()`.
+
+Here's a simple example that creates a (very dumb) `Authenticator` and sets up authentication:
+```java
+Authenticator a = (String username, String passphrase) -> {
+    if("testuser".equalsIgnoreCase(username) && "letmein".equals(passphrase)) {
+        return new User("testuser");
+    } else {
+        return null;
+    }
+};
+        
+auth(new FormAuthFilter(a).exempt("/favicon.ico"));
+```
+Boom will automatically exempt the `/login` and `/logout` paths used by `FormAuthFilter`.
+
+
+
+
 ## TODO
 
 A bunch of things remain planned:
 
-  * Authentication Filter (already done in another project, needs to be extracted and cleaned up)
-  * Automatic CSRF protection (already done as above)
+  * Automatic CSRF protection (already done in another project, needs to be extracted and cleaned up)
   * i18n
   * maybe provide separate jars bundling existing static content (e.g. jquery, font-awesome, etc.) or use WebJars
   * Maven project archetype or other project setup tool

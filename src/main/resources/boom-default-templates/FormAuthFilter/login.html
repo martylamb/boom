@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{= title }</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="apple-mobile-web-app-capable" content="yes">
+        <meta name="mobile-web-app-capable" content="yes">
+        <META NAME="ROBOTS" CONTENT="NOINDEX, NOFOLLOW">
+    </head>
+    <body>
+        <h1>{= title }</h1>
+        {# include error.html if error_msg }
+        <form id="loginForm" role="form" method="POST" action="{= loginPath }">
+            {= login_user_prompt}: <input id="u" name="u" type="text" placeholder = "{= username_label }" required value="{= user }"><br/>
+            {= login_passphrase_prompt}: <input id="p" name="p" type="password" placeholder = "{= password_label }" required><br/>
+            <button id="b" type="submit" class="pure-button pure-button-primary pure-input-1">{= login_button_label }</button>            
+        </form>
+        <hr/>
+        <i>To change this login form, define a template FormAuthFilter/login.html in your project.</i>
+    </body>
+    
+</html>
