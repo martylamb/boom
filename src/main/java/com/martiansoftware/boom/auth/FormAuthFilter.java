@@ -1,8 +1,9 @@
-package com.martiansoftware.boom;
+package com.martiansoftware.boom.auth;
 
 import static com.martiansoftware.boom.Boom.*;
 
 import java.util.Collection;
+import java.util.ResourceBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Filter;
@@ -11,18 +12,14 @@ import spark.Response;
 import spark.Session;
 
 /**
- *
+ * TODO: document design here.
+ * 
  * @author mlamb
  */
 public class FormAuthFilter implements Filter {
 
-//    private static final AppContext app = AppContext.get();
     
     private static final Logger log = LoggerFactory.getLogger(FormAuthFilter.class);
-    
-    // stores the username in the session.  if this is set the user is considered
-    // authenticated.  other stuff can be stored as well, but this is required.
-    public static final String USERNAME_KEY = FormAuthFilter.class.getCanonicalName() + ".USERNAME";
     
     // if the user requests a page that requires auth and we redirect them to the
     // login page, this session property stores the originally requested url so
@@ -42,14 +39,6 @@ public class FormAuthFilter implements Filter {
     // collection of url paths that do not require authentication.
     private Collection<String> _exempt = new java.util.HashSet<>();
     
-    // used to verify username/password.  does not store USERNAME or REDIRECT, but may store
-    // other things if necessary
-    public interface Authenticator {
-        // return the username (in canonical string form) if authenticated, null if not authenticated
-        // may put other things in the session
-        public String authenticate(String username, String password, spark.Session session);
-    }
-    
     // creates a new Auth and sets up login/logout paths in spark
     public FormAuthFilter(Authenticator authenticator) {
         this.authenticator = authenticator;
@@ -62,13 +51,14 @@ public class FormAuthFilter implements Filter {
         
     /*
      * Exempts a path from authentication requirements.  NOTE: does not (yet?)
-     * adhere to spark path semantics - this is just a full path string
+     * adhere to spark path semantics - this is just a simple path string
+     * (e.g. /a/b/c.html)
      */    
     public FormAuthFilter exempt(String path) { _exempt.add(path); return this;}
     
     @Override
     public void handle(Request rqst, Response rspns) throws Exception {
-        log.trace("checking auth requirements for {} to access {}", getUsername(rqst), rqst.pathInfo());
+        log.trace("checking authentication requirements to access {}", rqst.pathInfo());
         
         if (_exempt.contains(rqst.pathInfo())) {
             log.trace("exempt: {}", rqst.pathInfo());
@@ -77,10 +67,11 @@ public class FormAuthFilter implements Filter {
         }
         
         Session session = session(true);
-        if (getUsername(rqst) == null) {
+        User user = session(true).attribute(User.SESSION_KEY);
+        if (user == null) {
             // not authenticated, so remember where user was trying to go and
             // show them the login page
-            log.trace("auth required.");
+            log.trace("authentication required.");
             String q = rqst.raw().getQueryString();
             StringBuilder u = new StringBuilder(rqst.url());
             if (q != null) {
@@ -92,22 +83,34 @@ public class FormAuthFilter implements Filter {
         } else {
             // authenticated, so clear any stored redirection and allow
             // spark to continue normal processing
-            log.trace("allowed for {}: {}", getUsername(rqst), rqst.pathInfo());
+            log.trace("authenticated for {}: {}", user.username(), rqst.pathInfo());
             session.attribute(REDIRECT_KEY, null);
         }
         
     }
     
     public Object logout() {
-        log.info("{} logged out.", getUsername(request()));
+        User user = session(true).attribute(User.SESSION_KEY);
+        String uname = (user == null) ? "Anonymous" : user.username();
+        log.info("{} logged out.", uname);
         session().invalidate();
         return template("/FormAuthFilter/loggedout.html");
+    }
+    
+    // utility method to copy specific resource strings from a resource bundle into the current template context
+    // TODO: pull this out as a boom utility function?
+    private void cResources(String bundle, String... resources) {
+        ResourceBundle r = r(bundle);
+        for (String resource : resources) context(resource, r.getString(resource));
     }
     
     String showForm(String user) {
         try {
             // display the login form with no initial username
             context("user", user == null ? "" : user);  // TODO: render nulls as empty strings
+            context("loginPath", loginPath);
+            context("title", r("FormAuthFilter").getString("login_title"));
+            cResources("FormAuthFilter", "login_user_prompt", "login_passphrase_prompt", "login_button_label");
             return template("/FormAuthFilter/login.html").render(context());
         } catch (Exception e) {
             // TODO: return better error
@@ -120,24 +123,20 @@ public class FormAuthFilter implements Filter {
     Object submitForm() {
         String u = request().queryParams("u");
         String p = request().queryParams("p");
-        
-        String canonicalUsername = authenticator.authenticate(u, p, session());
-        if (canonicalUsername != null) {
+
+        User user = authenticator.authenticate(u, p);
+        if (user != null) {
             // login OK
-            log.info("{} logged in.", canonicalUsername);
-            session().attribute(USERNAME_KEY, canonicalUsername);
+            log.info("{} logged in.", user.username());
+            session(true).attribute(User.SESSION_KEY, user);
             String url = session().attribute(REDIRECT_KEY);
             if (url == null) url = "/";
             response().redirect(url, 302);
             return null; // not called; redirect throws a HaltException.  needed to satisfy compiler.
         } else {
-            context().put("error", r("FormAuthFilter").getString("login_failed"));
-            return showForm(u); // badd username or password
+            context().put("error_msg", r("FormAuthFilter").getString("login_failed"));
+            return showForm(u); // bad username or password
         }
     }
     
-    // get username (if any) from session (if any)
-    public static String getUsername(Request rqst) {
-        return rqst.session(true).attribute(USERNAME_KEY);
-    }
 }

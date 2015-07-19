@@ -1,5 +1,6 @@
 package com.martiansoftware.boom;
 
+import com.martiansoftware.boom.auth.Authenticator;
 import com.martiansoftware.dumbtemplates.DumbTemplate;
 import com.martiansoftware.dumbtemplates.DumbTemplateStore;
 import java.io.ByteArrayInputStream;
@@ -34,22 +35,28 @@ import spark.route.HttpMethod;
 public class Boom extends SparkBase {
 
     private Boom() {}
+    
+    /**
+     * If not null, used to authenticate all requests.  
+     */
+    private static volatile Filter _authFilter = null;
+
     private static final Logger log = LoggerFactory.getLogger(Boom.class);
     private static final boolean _debug;
     
     private static final ThreadLocal<BoomContext> _boomContext = new ThreadLocal<>();
-    
     private static ContextFactory _templateContextFactory = java.util.HashMap::new;
 
     private static final DumbTemplateStore _templates;
     private static final PathResolver _pathResolver = new PathResolver("/");
     private static final List<Filter> _beforeFilters = new java.util.LinkedList<>();
     private static final List<Filter> _afterFilters = new java.util.LinkedList<>();
-    
+        
     static {
-        // TODO: allow port and static content to be done before routes are added.
+        // TODO: allow port and static content to be done before routes are added?
         initStaticContent();
         initThreadLocalsFilter();
+        initAuthenticationFilter();
         _debug = Debug.init();
         _templates = Templates.init();
     }
@@ -83,6 +90,10 @@ public class Boom extends SparkBase {
     
     public static String resolvePath(String path) { return _pathResolver.resolve(path).toString(); }
 
+    public static void auth(Filter newAuthenticationFilter) {
+        _authFilter = newAuthenticationFilter;
+    }
+    
     public static void locale(Locale locale) {
         session(true).attribute(Constants.LOCALE_ATTRIBUTE, locale);
     }
@@ -183,6 +194,18 @@ public class Boom extends SparkBase {
             tctx.put(Constants.BOOM_ROOT, _pathResolver.resolve("/"));
             _boomContext.set(new BoomContext(req, rsp, tctx));            
         });        
+    }
+    
+    private static void initAuthenticationFilter() {
+        Spark.before((Request req, Response rsp) -> {
+            Filter f = _authFilter;
+            if (f != null) f.handle(req, rsp);
+        });
+    }
+    
+    private static void initAuthFilter() {
+        // should go before anything, including static resources, but
+        // how to specify required permissions?
     }
     
     public interface ContextFactory {

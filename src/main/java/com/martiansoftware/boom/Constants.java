@@ -14,4 +14,5 @@ class Constants {
     static final String BOOM_ROOT = "boom_root";
     
     static final String DEBUG_ENV_OR_PROPERTY = "BOOM_DEBUG";
+    
 }
