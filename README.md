@@ -110,6 +110,8 @@ myFormAuthFilter.exempt("/favicon.ico").exempt("/styles.css").exempt("/images/lo
 ```
   * Tell Boom to use your `FormAuthFilter` via `Boom.auth()`.
 
+### Authentication Example
+
 Here's a simple example that creates a (very dumb) `Authenticator` and sets up authentication:
 ```java
 Authenticator a = (String username, String passphrase) -> {
