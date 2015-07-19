@@ -104,11 +104,11 @@ public interface Authenticator {
 }
 ```
   * Create a `FormAuthFilter`.  This is a class in `com.martiansoftware.boom.auth` that filters requests and presents a login page when required.  The default login page templates are in `boom-default-templates.FormAuthFilter` and can be customized by placing your own `FormAuthFilter/login.html` and `FormAuthFilter/loggedout.html` templates in your own template directory as described above.  Take a look at the default login.html form to see the appropriate query parameters and POST destination.  `FormAuthFilter`'s constructor takes a single argument: the `Authenticator` you created in the previous step.
-  *. Exempt any paths that DO NOT require authentication in the `FormAuthFilter` via its exempt() method.  This method returns the modified `FormAuthFilter` so it may be chained as follows:
+  * Exempt any paths that DO NOT require authentication in the `FormAuthFilter` via its exempt() method.  This method returns the modified `FormAuthFilter` so it may be chained as follows:
 ```java
 myFormAuthFilter.exempt("/favicon.ico").exempt("/styles.css").exempt("/images/logo.png");
 ```
-  *. Tell Boom to use your `FormAuthFilter` via `Boom.auth()`.
+  * Tell Boom to use your `FormAuthFilter` via `Boom.auth()`.
 
 Here's a simple example that creates a (very dumb) `Authenticator` and sets up authentication:
 ```java
