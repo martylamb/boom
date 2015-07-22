@@ -16,15 +16,15 @@ import spark.Session;
  * 
  * @author mlamb
  */
-public class FormAuthFilter implements Filter {
+public class FormLoginFilter implements Filter {
 
     
-    private static final Logger log = LoggerFactory.getLogger(FormAuthFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(FormLoginFilter.class);
     
     // if the user requests a page that requires auth and we redirect them to the
     // login page, this session property stores the originally requested url so
     // we can redirect them after a successful login
-    private static final String REDIRECT_KEY = FormAuthFilter.class.getCanonicalName() + ".REDIRECT";
+    private static final String REDIRECT_KEY = FormLoginFilter.class.getCanonicalName() + ".REDIRECT";
     
     // verifyies username/password
     private final Authenticator authenticator;
@@ -40,7 +40,7 @@ public class FormAuthFilter implements Filter {
     private Collection<String> _exempt = new java.util.HashSet<>();
     
     // creates a new Auth and sets up login/logout paths in spark
-    public FormAuthFilter(Authenticator authenticator) {
+    public FormLoginFilter(Authenticator authenticator) {
         this.authenticator = authenticator;
         exempt(loginPath);
         exempt(logoutPath);
@@ -54,7 +54,7 @@ public class FormAuthFilter implements Filter {
      * adhere to spark path semantics - this is just a simple path string
      * (e.g. /a/b/c.html)
      */    
-    public FormAuthFilter exempt(String path) { _exempt.add(path); return this;}
+    public FormLoginFilter exempt(String path) { _exempt.add(path); return this;}
     
     @Override
     public void handle(Request rqst, Response rspns) throws Exception {
