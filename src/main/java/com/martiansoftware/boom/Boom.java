@@ -188,6 +188,10 @@ public class Boom extends SparkBase {
         }
     }
 
+    public static boolean isRequestThread() {
+        return _boomContext.get() != null;
+    }
+    
     private static void initThreadLocalsFilter() {
         Spark.before((Request req, Response rsp) -> {
             Map<String, Object> tctx = _templateContextFactory.createContext();
