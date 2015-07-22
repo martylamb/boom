@@ -1,6 +1,9 @@
 package com.martiansoftware.boom.auth;
 
+import com.martiansoftware.boom.Boom;
+import java.util.Optional;
 import java.util.Set;
+import spark.Session;
 
 /**
  *
@@ -60,6 +63,23 @@ public class User {
         _permissions.add(perm);
         return this;
     }
+
+    @Override public String toString() {
+        return username();
+    }
     
-    // TODO: public static final Optional<User> current();
+    /**
+     * Returns the current logged-in user, if any
+     * @return the current logged-in user, if any
+     */
+    public static Optional<User> current() {
+        User user = null;
+        if (Boom.isRequestThread()) {
+            Session session = Boom.session(false);
+            if (session != null) {
+                user = session.attribute(SESSION_KEY);
+            }
+        }
+        return user == null ? Optional.empty() : Optional.of(user);
+    }
 }
