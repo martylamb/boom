@@ -1,16 +1,20 @@
 package com.martiansoftware.boom;
 
+import static com.martiansoftware.boom.Boom.permissions;
 import com.martiansoftware.boom.auth.Authenticator;
+import com.martiansoftware.boom.auth.User;
 import com.martiansoftware.dumbtemplates.DumbTemplate;
 import com.martiansoftware.dumbtemplates.DumbTemplateStore;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +45,11 @@ public class Boom extends SparkBase {
      */
     private static volatile Filter _loginFilter = null;
 
+    /**
+     * If not null and nonempty, require these permissions for all subsequent requests
+     */
+    private static volatile Object[] _permissions = null;
+    
     private static final Logger log = LoggerFactory.getLogger(Boom.class);
     private static final boolean _debug;
     
@@ -90,8 +99,39 @@ public class Boom extends SparkBase {
     
     public static String resolvePath(String path) { return _pathResolver.resolve(path).toString(); }
 
+    /**
+     * Configures a login filter.  A login filter is applied early on in the
+     * filter set to require user logins.  See FormAuthFilter.
+     * 
+     * @param newLoginFilter 
+     */
     public static void login(Filter newLoginFilter) {
         _loginFilter = newLoginFilter;
+    }
+
+    /**
+     * If called while handling a request, verifies that the current User (if any)
+     * has ALL of the require permissions; if called during server setup, notes
+     * the required permissions and automatically adds a check before all subsequently
+     * added routes.
+     * 
+     * @param perms 
+     */
+    public static void permissions(Object... perms) {
+        if (isRequestThread()) { // processing a request, so check permissions NOW!
+            User user = User.current().orElse(new User(null));
+            Optional<User> ouser = User.current();
+            boolean authorized = true;
+            for (Object p : perms) {
+                if (!user.hasPermission(p)) {
+                    authorized = false;
+                    break;
+                }
+            }
+            if (!authorized) halt(403);
+        } else { // configuring server, so note permissions to be checked during boomwrap()
+            _permissions = (perms == null || perms.length == 0) ? null : Arrays.copyOf(perms, perms.length);
+        }        
     }
     
     public static void locale(Locale locale) {
@@ -170,13 +210,30 @@ public class Boom extends SparkBase {
     public static void after(String path, String acceptType, Filter filter) { Spark.after(path, acceptType, filter); }
     public static boolean removeAfter(Filter filter) { return _afterFilters.remove(filter); }
     public static void clearAfter() { _afterFilters.clear(); }
+
     
-    protected static Route boomwrap(final Route route) {
-        return new RouteWrapper(route);
+    protected static Route boomwrap(Route route) {
+        Route wrapped = route;
+        if (_permissions != null && _permissions.length > 0) {
+            Object[] permsCopy = _permissions; // copy perms at time of adding route
+            wrapped = (req,rsp) -> {
+                permissions(permsCopy);
+                return route.handle(req, rsp);
+            };
+        }
+        return new RouteWrapper(wrapped);
     }
     
     protected static TemplateViewRoute boomwrap(TemplateViewRoute route) {
-        return route;
+        TemplateViewRoute wrapped = route;
+        if (_permissions != null && _permissions.length > 0) {
+            Object[] permsCopy = _permissions; // copy perms at time of adding route
+            wrapped = (req,rsp) -> {
+                permissions(permsCopy);
+                return route.handle(req, rsp);
+            };
+        }
+        return wrapped;
     }    
     
     // below methods set up all the static boom fun stuff
