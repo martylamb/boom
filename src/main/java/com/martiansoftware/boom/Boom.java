@@ -39,7 +39,7 @@ public class Boom extends SparkBase {
     /**
      * If not null, used to authenticate all requests.  
      */
-    private static volatile Filter _authFilter = null;
+    private static volatile Filter _loginFilter = null;
 
     private static final Logger log = LoggerFactory.getLogger(Boom.class);
     private static final boolean _debug;
@@ -56,7 +56,7 @@ public class Boom extends SparkBase {
         // TODO: allow port and static content to be done before routes are added?
         initStaticContent();
         initThreadLocalsFilter();
-        initAuthenticationFilter();
+        initLoginFilter();
         _debug = Debug.init();
         _templates = Templates.init();
     }
@@ -90,8 +90,8 @@ public class Boom extends SparkBase {
     
     public static String resolvePath(String path) { return _pathResolver.resolve(path).toString(); }
 
-    public static void auth(Filter newAuthenticationFilter) {
-        _authFilter = newAuthenticationFilter;
+    public static void login(Filter newLoginFilter) {
+        _loginFilter = newLoginFilter;
     }
     
     public static void locale(Locale locale) {
@@ -196,9 +196,9 @@ public class Boom extends SparkBase {
         });        
     }
     
-    private static void initAuthenticationFilter() {
+    private static void initLoginFilter() {
         Spark.before((Request req, Response rsp) -> {
-            Filter f = _authFilter;
+            Filter f = _loginFilter;
             if (f != null) f.handle(req, rsp);
         });
     }

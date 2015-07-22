@@ -103,12 +103,12 @@ public interface Authenticator {
     public User authenticate(String username, String passphrase);
 }
 ```
-  * Create a `FormAuthFilter`.  This is a class in `com.martiansoftware.boom.auth` that filters requests and presents a login page when required.  The default login page templates are in `boom-default-templates.FormAuthFilter` and can be customized by placing your own `FormAuthFilter/login.html` and `FormAuthFilter/loggedout.html` templates in your own template directory as described above.  Take a look at the default login.html form to see the appropriate query parameters and POST destination.  `FormAuthFilter`'s constructor takes a single argument: the `Authenticator` you created in the previous step.
-  * Exempt any paths that DO NOT require authentication in the `FormAuthFilter` via its exempt() method.  This method returns the modified `FormAuthFilter` so it may be chained as follows:
+  * Create a `FormLoginFilter`.  This is a class in `com.martiansoftware.boom.auth` that filters requests and presents a login page when required.  The default login page templates are in `boom-default-templates.FormLoginFilter` and can be customized by placing your own `FormLoginFilter/login.html` and `FormLoginFilter/loggedout.html` templates in your own template directory as described above.  Take a look at the default login.html form to see the appropriate query parameters and POST destination.  `FormLoginFilter`'s constructor takes a single argument: the `Authenticator` you created in the previous step.
+  * Exempt any paths that DO NOT require authentication in the `FormLoginFilter` via its exempt() method.  This method returns the modified `FormLoginFilter` so it may be chained as follows:
 ```java
-myFormAuthFilter.exempt("/favicon.ico").exempt("/styles.css").exempt("/images/logo.png");
+myFormLoginFilter.exempt("/favicon.ico").exempt("/styles.css").exempt("/images/logo.png");
 ```
-  * Tell Boom to use your `FormAuthFilter` via `Boom.auth()`.
+  * Tell Boom to use your `FormLoginFilter` via `Boom.login()`.
 
 ### Authentication Example
 
@@ -122,9 +122,9 @@ Authenticator a = (String username, String passphrase) -> {
     }
 };
         
-auth(new FormAuthFilter(a).exempt("/favicon.ico"));
+login(new FormLoginFilter(a).exempt("/favicon.ico"));
 ```
-Boom will automatically exempt the `/login` and `/logout` paths used by `FormAuthFilter`.
+Boom will automatically exempt the `/login` and `/logout` paths used by `FormLoginFilter`.
 
 
 
