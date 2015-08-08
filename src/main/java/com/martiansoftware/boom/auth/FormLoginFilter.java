@@ -4,6 +4,7 @@ import static com.martiansoftware.boom.Boom.*;
 
 import java.util.Collection;
 import java.util.ResourceBundle;
+import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Filter;
@@ -37,7 +38,13 @@ public class FormLoginFilter implements Filter {
     private static final String logoutPath = "/logout";
     
     // collection of url paths that do not require authentication.
-    private Collection<String> _exempt = new java.util.HashSet<>();
+    private final Collection<String> _exempt = new java.util.HashSet<>();
+    
+    // collection of url prefixes that do not require authentication.
+    private final Collection<String> _exemptPrefixes = new java.util.HashSet<>();
+    
+    // collection of predicates that can evaluate a url path to determine if it is exempt from authentication requirements
+    private final Collection<Predicate<String>> _exemptPredicates = new java.util.HashSet<>();
     
     // creates a new Auth and sets up login/logout paths in spark
     public FormLoginFilter(Authenticator authenticator) {
@@ -56,11 +63,41 @@ public class FormLoginFilter implements Filter {
      */    
     public FormLoginFilter exempt(String path) { _exempt.add(path); return this;}
     
+    /**
+     * Exempts a path prefix from authentication requirements.  For example,
+     * to exempt all URLs under the css directory, you can exemptPrefix("/css/");
+     * It's probably a good idea to include the trailing slash; otherwise,
+     * the above would also exempt "/css-private" because it starts with "/css".
+     * 
+     * @param prefix the path prefix to exempt from authentication requirements
+     * @return this FormLoginFilter
+     */   
+    public FormLoginFilter exemptPrefix(String prefix) { _exemptPrefixes.add(prefix); return this;}
+    
+    /**
+     * Exempts paths that satisfy the Predicate from authentication requirements.
+     * 
+     * @param pred the predicate to evaluate against URL paths (e.g., "/index.html")
+     * @return this FormLoginFilter
+     */
+    public FormLoginFilter exempt(Predicate<String> pred) { _exemptPredicates.add(pred); return this;}
+    
+    /**
+     * Returns true if the specified path is exempt from authentication requirements
+     * @param pathInfo the path to check (e.g., "/index.html")
+     * @return true if the specified path is exempt from authentication requirements
+     */
+    public boolean isExempt(String pathInfo) {
+        if (_exempt.contains(pathInfo)) return true;
+        if (_exemptPrefixes.stream().anyMatch(prefix -> pathInfo.startsWith(prefix))) return true;
+        return (_exemptPredicates.stream().anyMatch(pred -> pred.test(pathInfo)));
+    }
+    
     @Override
     public void handle(Request rqst, Response rspns) throws Exception {
         log.trace("checking authentication requirements to access {}", rqst.pathInfo());
         
-        if (_exempt.contains(rqst.pathInfo())) {
+        if (isExempt(rqst.pathInfo())) {
             log.trace("exempt: {}", rqst.pathInfo());
             return; // requested page does not require auth; return from filter
                     // and let spark continue normal processing
