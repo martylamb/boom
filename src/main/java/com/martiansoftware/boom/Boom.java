@@ -10,12 +10,14 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.ExceptionHandler;
@@ -31,6 +33,7 @@ import spark.SparkBase;
 import spark.TemplateEngine;
 import spark.TemplateViewRoute;
 import spark.route.HttpMethod;
+import spark.utils.MimeParse;
 
 /**
  *
@@ -158,6 +161,43 @@ public class Boom extends SparkBase {
         try { result = ResourceBundle.getBundle("bundles." + bundleName); } catch (MissingResourceException ohWell) {};
         if (result == null) result = ResourceBundle.getBundle("boom-default-bundles." + bundleName);
         return result;
+    }
+    
+    /**
+     * Returns the specified query param from the current request
+     * @param paramName the query param to get
+     * @return the specified query param from the current request
+     */
+    public static String q(String paramName) {
+        return request().queryParams(paramName);
+    }
+    
+    /**
+     * Returns the specified header value from the current request
+     * @param headerName the header name to get
+     * @return the specified header value from the current request
+     */
+    public static String h(String headerName) {
+        return request().headers(headerName);
+    }
+    
+    /**
+     * Given one or more encoding options for a response, selects the one most
+     * preferred by the current client.  If none of the supported encodings are
+     * acceptable by the client or if an unknown MIME type is specified, the
+     * request is halted with status 406 (Not Acceptable).
+     * @param supportedMimeTypes the MIME types that you as the developer are
+     * prepared to return
+     * @return the client's preferred selection of the supported MIME types, or
+     * else will halt with status 406 (Not Acceptable)
+     */
+    public static MimeType preferredEncodingOf(MimeType... supportedMimeTypes) {
+        Collection<String> supported = Arrays.asList(supportedMimeTypes).stream().map(m -> m.toString()).collect(Collectors.toSet());
+        String bestMatch = MimeParse.bestMatch(supported, h("Accept"));
+        if (bestMatch.equals(MimeParse.NO_MIME_TYPE)) halt(406);
+        MimeType m = MimeType.forName(bestMatch);
+        if (m == null) halt(406);
+        return m;
     }
     
     /**

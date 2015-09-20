@@ -1,5 +1,6 @@
 package com.martiansoftware.boom;
 
+import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -1120,8 +1121,17 @@ public enum MimeType {
     ZMM("application/vnd.HandHeld-Entertainment+xml"),
     ZONE("text/dns");
 
+    private static final Map<String, MimeType> byName = new java.util.HashMap<>();
     private static final Pattern ext = Pattern.compile("^.*\\.([^.]+)$");
     private final String type;
+    
+    static {
+        for (MimeType m : MimeType.values()) byName.put(m.toString(), m);
+    }
+
+    public static MimeType forName(String headerVal) {
+        return byName.get(headerVal);
+    }
     
     public static MimeType forFilename(String filename) {
         Matcher m = ext.matcher(filename);
