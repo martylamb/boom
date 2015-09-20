@@ -3,6 +3,7 @@ package com.martiansoftware.boom;
 
 import static com.martiansoftware.boom.Boom.*;
 import com.martiansoftware.dumbtemplates.DumbTemplate;
+import java.util.Map;
 import java.util.ResourceBundle;
 import javax.servlet.http.HttpServletResponse;
 import spark.HaltException;
@@ -24,14 +25,33 @@ public class StatusPage {
     public static BoomResponse of(int status, String body) {
         ResourceBundle rb = Boom.r("httpstatus");
         String stext = rb.getString(String.format("SC_%d", status));
-        context("status", status);
-        context("title", String.format("%d %s", status, stext == null ? "" : stext));
-        context("body", body == null ? stext : body);
-        // TODO: add stack trace if debug and status==500
-        DumbTemplate t = template(String.format("/boom/status/%d.html", status));
-        if (t == null) t = template("/boom/status/default.html");
-        return new BoomResponse(t.render(context()))
-                                        .status(status)
-                                        .as(MimeType.HTML);
+        
+        if ("application/json".equals(request().headers("Accept"))) {
+            Map<String, Object> result = new java.util.TreeMap<>();
+            result.put("status", status);
+            result.put("status_desc", stext);
+            result.put("message", body);
+            return json(result).status(status);
+        } else if ("text/plain".equals(request().headers("Accept"))) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Status: ");
+            sb.append(status);
+            sb.append("\nStatus Description: ");
+            sb.append(stext == null ? "" : stext);
+            sb.append("\nMessage: ");
+            sb.append(body);
+            sb.append("\n");
+            return new BoomResponse(sb.toString()).status(status).as(MimeType.TEXT);
+        } else {
+            context("status", status);
+            context("title", String.format("%d %s", status, stext == null ? "" : stext));
+            context("body", body == null ? stext : body);
+            // TODO: add stack trace if debug and status==500
+            DumbTemplate t = template(String.format("/boom/status/%d.html", status));
+            if (t == null) t = template("/boom/status/default.html");
+            return new BoomResponse(t.render(context()))
+                                            .status(status)
+                                            .as(MimeType.HTML);
+        }
     }
 }
