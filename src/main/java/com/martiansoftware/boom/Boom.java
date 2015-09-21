@@ -29,7 +29,6 @@ import spark.ResponseTransformer;
 import spark.Route;
 import spark.Session;
 import spark.Spark;
-import spark.SparkBase;
 import spark.TemplateEngine;
 import spark.TemplateViewRoute;
 import spark.route.HttpMethod;
@@ -39,7 +38,7 @@ import spark.utils.MimeParse;
  *
  * @author mlamb
  */
-public class Boom extends SparkBase {
+public class Boom {
 
     private Boom() {}
     
@@ -279,9 +278,9 @@ public class Boom extends SparkBase {
     // below methods set up all the static boom fun stuff
     static void initStaticContent() {
         if (debug()) {
-            externalStaticFileLocation(Constants.STATIC_CONTENT_DEBUG);
+            Spark.externalStaticFileLocation(Constants.STATIC_CONTENT_DEBUG);
         } else {
-            staticFileLocation(Constants.STATIC_CONTENT_PRODUCTION);
+            Spark.staticFileLocation(Constants.STATIC_CONTENT_PRODUCTION);
         }
     }
 
