@@ -172,6 +172,19 @@ public class Boom {
     }
     
     /**
+     * Returns the specified query param from the current request, or
+     * the specified default value if the requested parameter is not set
+     * @param paramName the query param to get
+     * @param defaultValue the default value to return if the requested parameter is not set
+     * @return the specified query param from the current request, or
+     * the specified default value if the requested parameter is not set
+     */
+    public static String q(String paramName, String defaultValue) {
+        String result = q(paramName);
+        return result == null ? defaultValue : result;
+    }
+    
+    /**
      * Returns the specified header value from the current request
      * @param headerName the header name to get
      * @return the specified header value from the current request
