@@ -19,16 +19,20 @@ public class StatusPage {
     
     public static BoomResponse of(HaltException he) {
         log(he.getStatusCode(), he);
-        return of(he.getStatusCode(), he.getBody());
+        return of(he.getStatusCode(), he.getBody(), false);
     }
     
     public static BoomResponse of(Exception e) {
         log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
-        return of(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
+        return of(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage(), false);
     }
-        
+    
     public static BoomResponse of(int status, String body) {
-        if (status == HttpServletResponse.SC_INTERNAL_SERVER_ERROR) {
+        return of(status, body, true);
+    }
+    
+    private static BoomResponse of(int status, String body, boolean logErr) {
+        if (logErr && isServerError(status)) {
             log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, new Exception());
         }
         ResourceBundle rb = Boom.r("httpstatus");
@@ -61,6 +65,10 @@ public class StatusPage {
                                             .status(status)
                                             .as(MimeType.HTML);
         }
+    }
+    
+    private static boolean isServerError(int status) {
+        return status >= 500 && status <= 599;
     }
     
     private static void log(int status, Exception e) {
