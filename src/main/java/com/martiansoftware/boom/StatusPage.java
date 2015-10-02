@@ -6,6 +6,8 @@ import com.martiansoftware.dumbtemplates.DumbTemplate;
 import java.util.Map;
 import java.util.ResourceBundle;
 import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import spark.HaltException;
 
 /**
@@ -13,16 +15,22 @@ import spark.HaltException;
  * @author mlamb
  */
 public class StatusPage {
+    private static final Logger log = LoggerFactory.getLogger(StatusPage.class);
     
     public static BoomResponse of(HaltException he) {
+        log(he.getStatusCode(), he);
         return of(he.getStatusCode(), he.getBody());
     }
     
     public static BoomResponse of(Exception e) {
+        log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e);
         return of(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.getMessage());
     }
-    
+        
     public static BoomResponse of(int status, String body) {
+        if (status == HttpServletResponse.SC_INTERNAL_SERVER_ERROR) {
+            log(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, new Exception());
+        }
         ResourceBundle rb = Boom.r("httpstatus");
         String stext = rb.getString(String.format("SC_%d", status));
         
@@ -53,5 +61,9 @@ public class StatusPage {
                                             .status(status)
                                             .as(MimeType.HTML);
         }
+    }
+    
+    private static void log(int status, Exception e) {
+        log.error(status + ": " + e.getMessage(), e);
     }
 }
