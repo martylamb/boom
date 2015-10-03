@@ -9,6 +9,8 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -63,6 +65,8 @@ public class Boom {
     private static final List<Filter> _beforeFilters = new java.util.LinkedList<>();
     private static final List<Filter> _afterFilters = new java.util.LinkedList<>();
         
+    static volatile Path _tmp = Paths.get(System.getProperty("java.io.tmpdir"));
+    
     static {
         // TODO: allow port and static content to be done before routes are added?
         initStaticContent();
@@ -148,6 +152,20 @@ public class Boom {
         }
         return result;
     }
+    
+    /**
+     * Set the temp directory for Boom's per-handler temp subdirectories
+     * @param tmp the temp directory to use
+     * @return the temp directory
+     */
+    public static Path tmp(Path tmp) { _tmp = tmp; return _tmp; }
+    
+    /**
+     * Obtain a handler-specific temporary directory, creating it if necessary
+     * @return a handler-specific temporary directory
+     * @throws IOException 
+     */
+    public static Path tmp() throws IOException { return _boomContext.get().tmp(); }
     
     /**
      * Specify a ContextFactory to provide a preinitialized or otherwise specialized context
@@ -251,6 +269,9 @@ public class Boom {
     public static boolean removeAfter(Filter filter) { return _afterFilters.remove(filter); }
     public static void clearAfter() { _afterFilters.clear(); }
 
+    static void postRequestCleanup() {
+        if (isRequestThread()) _boomContext.get().cleanup();
+    }
     
     protected static Route boomwrap(Route route) {
         Route wrapped = route;
@@ -273,7 +294,7 @@ public class Boom {
                 return route.handle(req, rsp);
             };
         }
-        return wrapped;
+        return wrapped; // TODO: ensure context cleanup here!
     }    
     
     // below methods set up all the static boom fun stuff

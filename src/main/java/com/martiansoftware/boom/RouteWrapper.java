@@ -32,6 +32,8 @@ class RouteWrapper implements Route {
             return StatusPage.of(he).respond(rspns);
         } catch (Exception e) {
             return StatusPage.of(e).respond(rspns);
+        } finally {
+            Boom.postRequestCleanup();
         }
     }
     
