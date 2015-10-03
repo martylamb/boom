@@ -44,12 +44,12 @@ class BoomContext {
                 // TODO: pull this out to an API
                 Files.walkFileTree(tmp, new SimpleFileVisitor<Path>() {
                     @Override public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                        log.warn("Deleting {}", file);
+                        log.trace("Deleting file {}", file);
                         Files.delete(file);
                         return FileVisitResult.CONTINUE;
                     }
                     @Override public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
-                        log.warn("Deleting {}", dir);
+                        log.trace("Deleting directory {}", dir);
                         Files.delete(dir);
                         return FileVisitResult.CONTINUE;
                     }
