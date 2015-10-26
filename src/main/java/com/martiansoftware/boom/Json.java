@@ -13,6 +13,7 @@ import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import static com.martiansoftware.boom.Boom.request;
 
 /**
  *
@@ -22,7 +23,7 @@ public class Json {
     private static Gson _gson;
     
     private static Gson gson() {
-        if (_gson == null) _gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssX").setPrettyPrinting().create();
+        if (_gson == null) _gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX").setPrettyPrinting().create();
         return _gson;
     }
 
@@ -40,6 +41,8 @@ public class Json {
             if (!success) ao.cancel();
         }
     }
+    
+    public static <T> T postBodyAs(Class<T> clazz) { return gson().fromJson(request().body(), clazz);}
     
     public static <T> T fromJson(String j, Class<T> clazz) { return gson().fromJson(j, clazz); }
     public static <T> T fromJson(Reader r, Class<T> clazz) { return gson().fromJson(r, clazz); }    
