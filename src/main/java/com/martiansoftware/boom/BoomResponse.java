@@ -22,6 +22,7 @@ public class BoomResponse {
     private InputStream bodyStream;
     private String bodyString;
     private String mimeType = MimeType.HTML.toString();
+    private String filename = null;
     
     public BoomResponse() { this(""); }
     public BoomResponse(InputStream in) { body(in); }
@@ -45,6 +46,7 @@ public class BoomResponse {
         return this;
     }
     
+    public BoomResponse named(String filename) { this.filename = filename; return this; }    
     public BoomResponse status(int statusCode) { status = statusCode; return this; }
     public BoomResponse ok() { return status(HttpServletResponse.SC_OK); }
     public BoomResponse forbidden() { return status(HttpServletResponse.SC_FORBIDDEN); }
@@ -58,6 +60,7 @@ public class BoomResponse {
     Object respond(Response rsp) throws IOException {
         rsp.status(status);
         rsp.type(mimeType);
+        if (filename != null) rsp.header("Content-Disposition", String.format("inline; filename=\"%s\"", filename));
         if (bodyStream != null) {
             copyStream(bodyStream, rsp.raw().getOutputStream());
             bodyStream.close();
