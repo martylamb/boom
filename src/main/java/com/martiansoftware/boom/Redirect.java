@@ -7,7 +7,7 @@ import spark.Route;
  * @author mlamb
  */
 public class Redirect {
-    public Route to(String dest) {
+    public static Route to(String dest) {
         return (req,rsp) -> {
             rsp.redirect(dest);
             return null;
