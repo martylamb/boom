@@ -103,6 +103,12 @@ public class Boom {
     */
     public static Response response() { return _boomContext.get().response; }
     
+    /**
+     * Sets the port on which the webserver will listen
+     * @param port the port on which the webserver will listen
+     */
+    public static void port(int port) { Spark.port(port); }
+    
     public static String resolvePath(String path) { return _pathResolver.resolve(path).toString(); }
 
     /**
