@@ -69,6 +69,7 @@ public class Boom {
     
     static {
         // TODO: allow port and static content to be done before routes are added?
+        initRequestLogging();
         initStaticContent();
         initThreadLocalsFilter();
         initLoginFilter();
@@ -364,7 +365,7 @@ public class Boom {
     
     // a whole bunch of convenient methods for creating BoomResponses of various typs
     public static BoomResponse binary(InputStream in) { return new BoomResponse(in).as(MimeType.BIN); }
-    public static BoomResponse binary(File f) throws IOException { return new BoomResponse(f).as(MimeType.BIN); }
+    public static BoomResponse binary(File f) throws IOException { return new BoomResponse(f).as(MimeType.BIN).named(f.getName()); }
     public static BoomResponse binary(byte[] b) { return new BoomResponse(new ByteArrayInputStream(b)).as(MimeType.BIN); }
     public static BoomResponse binary(byte[] b, int offset, int len) { return new BoomResponse(new ByteArrayInputStream(b, offset, len)).as(MimeType.BIN); }
     
