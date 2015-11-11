@@ -69,7 +69,6 @@ public class Boom {
     
     static {
         // TODO: allow port and static content to be done before routes are added?
-        initRequestLogging();
         initStaticContent();
         initThreadLocalsFilter();
         initLoginFilter();
