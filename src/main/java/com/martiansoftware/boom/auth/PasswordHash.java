@@ -51,7 +51,7 @@ import java.util.Arrays;
  * Author: havoc AT defuse.ca
  * www: http://crackstation.net/hashing-security.htm
  */
-class PasswordHash
+public class PasswordHash
 {
     public static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
 
