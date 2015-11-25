@@ -47,7 +47,7 @@ public class User {
      * @param perm the permission we're checking for
      * @return true iff this user has the specified permission
      */
-    public final boolean hasPermission(Object perm) {
+    public boolean hasPermission(Object perm) {
         return _permissions.contains(perm);
     }
     
