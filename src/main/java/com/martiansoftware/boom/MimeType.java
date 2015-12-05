@@ -1,5 +1,6 @@
 package com.martiansoftware.boom;
 
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
@@ -1130,10 +1131,12 @@ public enum MimeType {
     }
 
     public static MimeType forName(String headerVal) {
+        if (headerVal == null) return BIN;
         return byName.get(headerVal);
     }
     
     public static MimeType forFilename(String filename) {
+        if (filename == null) return BIN;
         Matcher m = ext.matcher(filename);
         MimeType result = BIN;
         if (m.matches()) {
@@ -1146,6 +1149,13 @@ public enum MimeType {
         return result;
     }
 
+    public static MimeType forPath(Path p) {
+        if (p == null) return BIN;
+        p = p.getFileName();
+        if (p == null) return BIN;
+        return forFilename(p.toString());
+    }
+    
     private MimeType(String t) {
         type = t;
     }
