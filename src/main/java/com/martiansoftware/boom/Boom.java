@@ -1,7 +1,6 @@
 package com.martiansoftware.boom;
 
 import static com.martiansoftware.boom.Boom.permissions;
-import com.martiansoftware.boom.auth.Authenticator;
 import com.martiansoftware.boom.auth.User;
 import com.martiansoftware.dumbtemplates.DumbTemplate;
 import com.martiansoftware.dumbtemplates.DumbTemplateStore;
@@ -20,6 +19,7 @@ import java.util.MissingResourceException;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
+import org.eclipse.jetty.util.URIUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.ExceptionHandler;
@@ -64,7 +64,9 @@ public class Boom {
     private static final PathResolver _pathResolver = new PathResolver("/");
     private static final List<Filter> _beforeFilters = new java.util.LinkedList<>();
     private static final List<Filter> _afterFilters = new java.util.LinkedList<>();
-        
+    private static final Object _lock = new Object();
+    private static boolean _initializedStaticContent = false;
+    
     static volatile Path _tmp = Paths.get(System.getProperty("java.io.tmpdir"));
     
     static {
@@ -72,15 +74,10 @@ public class Boom {
         initStaticContent();
         initThreadLocalsFilter();
         initLoginFilter();
+        
         _debug = Debug.init();
         _templates = Templates.init();
     }
-    
-    /**
-     * Provides an external entrypoint that can trigger Boom's static initializer
-     * if needed
-     */
-    public static void init() {}
     
     /**
      * Is Boom running in debug mode?  Debug mode allows reloading of changed
@@ -172,6 +169,15 @@ public class Boom {
      * @param cf the ContextFactory to use for all requests
      */
     public static void contextFactory(ContextFactory cf) { _templateContextFactory = cf; }
+    
+    /**
+     * Convert a path to a cananonical form. All instances of "." and ".." are
+     * factored out. "/" is returned if the path tries to .. above its root.
+     */
+    public static String canonicalPath(String path) {
+        String result = URIUtil.canonicalPath(path);
+        return result == null ? "/" : result;
+    }
     
     public static ResourceBundle r(String bundleName) {
         ResourceBundle result = null;
@@ -273,7 +279,7 @@ public class Boom {
         if (isRequestThread()) _boomContext.get().cleanup();
     }
     
-    protected static Route boomwrap(Route route) {
+    static Route boomwrap(Route route) {
         Route wrapped = route;
         if (_permissions != null && _permissions.length > 0) {
             Object[] permsCopy = _permissions; // copy perms at time of adding route
@@ -299,19 +305,39 @@ public class Boom {
     
     // below methods set up all the static boom fun stuff
     static void initStaticContent() {
-        if (debug()) {
-            Spark.externalStaticFileLocation(Constants.STATIC_CONTENT_DEBUG);
-        } else {
-            Spark.staticFileLocation(Constants.STATIC_CONTENT_PRODUCTION);
-        }
+        // static content really should be registered after everything else
+        // (since it's mapped to /*) but leaving that up to the user is error-prone,
+        // so instead we insert a filter that will run once on the first request
+        // to initialize the static content.
+        // TODO: This could be confounded by requests that come in before all
+        // of the routes are set up.  This should be fixed.
+        log.info("initStaticContent");
+        before("/*", (req, rsp) -> {
+            synchronized(_lock) {
+                if (!_initializedStaticContent) {
+                    get("/*", defaultStaticContentRoute());
+                    _initializedStaticContent = true;
+                    log.info("Initialized static content!");
+                } else {
+                    log.info("Already initialized!");
+                }
+            }
+        });
     }
 
+    public static Route defaultStaticContentRoute() {
+        ResourceRoute result = new ClasspathResourceRoute(Constants.STATIC_CONTENT_PRODUCTION);
+        if (debug()) result = new FilesystemResourceRoute(Constants.STATIC_CONTENT_DEBUG, result);
+        return result;        
+    }
+    
     public static boolean isRequestThread() {
         return _boomContext.get() != null;
     }
     
     private static void initThreadLocalsFilter() {
         Spark.before((Request req, Response rsp) -> {
+            log.info("FILTER: initThreadLocals");
             Map<String, Object> tctx = _templateContextFactory.createContext();
             tctx.put(Constants.BOOM_ROOT, _pathResolver.resolve("/"));
             _boomContext.set(new BoomContext(req, rsp, tctx));            
@@ -320,14 +346,10 @@ public class Boom {
     
     private static void initLoginFilter() {
         Spark.before((Request req, Response rsp) -> {
+            log.info("FILTER: loginFilter");
             Filter f = _loginFilter;
             if (f != null) f.handle(req, rsp);
         });
-    }
-    
-    private static void initAuthFilter() {
-        // should go before anything, including static resources, but
-        // how to specify required permissions?
     }
     
     public interface ContextFactory {
