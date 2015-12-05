@@ -5,6 +5,7 @@ import static com.martiansoftware.boom.Boom.*;
 import java.util.Collection;
 import java.util.ResourceBundle;
 import java.util.function.Predicate;
+import org.eclipse.jetty.util.URIUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Filter;
@@ -95,10 +96,10 @@ public class FormLoginFilter implements Filter {
     
     @Override
     public void handle(Request rqst, Response rspns) throws Exception {
-        log.trace("checking authentication requirements to access {}", rqst.pathInfo());
+        log.warn("checking authentication requirements to access {}", rqst.pathInfo());
         
         if (isExempt(rqst.pathInfo())) {
-            log.trace("exempt: {}", rqst.pathInfo());
+            log.warn("exempt: {}", rqst.pathInfo());
             return; // requested page does not require auth; return from filter
                     // and let spark continue normal processing
         }
@@ -108,20 +109,20 @@ public class FormLoginFilter implements Filter {
         if (user == null) {
             // not authenticated, so remember where user was trying to go and
             // show them the login page
-            log.trace("authentication required.");
-            String q = rqst.raw().getQueryString();
+            log.warn("authentication required.");
+            String q = canonicalPath(rqst.raw().getQueryString());
             StringBuilder u = new StringBuilder(rqst.url());
             if (q != null) {
                 u.append('?');
                 u.append(q);
             }
-            session.attribute(REDIRECT_KEY, u.toString());
+            rqst.attribute(REDIRECT_KEY, u.toString());
             halt(401, showForm(null));
         } else {
             // authenticated, so clear any stored redirection and allow
             // spark to continue normal processing
-            log.trace("authenticated for {}: {}", user.username(), rqst.pathInfo());
-            session.attribute(REDIRECT_KEY, null);
+            log.warn("authenticated for {}: {}", user.username(), rqst.pathInfo());
+            rqst.attribute(REDIRECT_KEY, null);
         }
         
     }
@@ -147,6 +148,7 @@ public class FormLoginFilter implements Filter {
             context("user", user == null ? "" : user);  // TODO: render nulls as empty strings
             context("loginPath", loginPath);
             context("title", r("FormAuthFilter").getString("login_title"));
+            context("url", request().attribute(REDIRECT_KEY));
             cResources("FormAuthFilter", "login_user_prompt", "login_passphrase_prompt", "login_button_label");
             return template("/FormAuthFilter/login.html").render(context());
         } catch (Exception e) {
@@ -160,13 +162,13 @@ public class FormLoginFilter implements Filter {
     Object submitForm() {
         String u = request().queryParams("u");
         String p = request().queryParams("p");
-
+        String url = request().queryParams("url");
+        
         User user = authenticator.authenticate(u, p);
         if (user != null) {
             // login OK
             log.info("{} logged in.", user.username());
             session(true).attribute(User.SESSION_KEY, user);
-            String url = session().attribute(REDIRECT_KEY);
             if (url == null) url = "/";
             response().redirect(url, 302);
             return null; // not called; redirect throws a HaltException.  needed to satisfy compiler.

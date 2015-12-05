@@ -8,9 +8,9 @@ import spark.Route;
  */
 public class Redirect {
     public static Route to(String dest) {
-        return (req,rsp) -> {
+        return Boom.boomwrap((Route) (req,rsp) -> {
             rsp.redirect(dest);
             return null;
-        };
+        });
     }
 }
