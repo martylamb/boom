@@ -14,6 +14,7 @@
         <form id="loginForm" role="form" method="POST" action="{= loginPath }">
             {= login_user_prompt}: <input id="u" name="u" type="text" placeholder = "{= username_label }" required value="{= user }"><br/>
             {= login_passphrase_prompt}: <input id="p" name="p" type="password" placeholder = "{= password_label }" required><br/>
+            <input id="url" name="url" type="hidden"  value="{= url }">
             <button id="b" type="submit" class="pure-button pure-button-primary pure-input-1">{= login_button_label }</button>            
         </form>
         <hr/>
