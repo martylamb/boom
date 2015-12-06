@@ -97,13 +97,13 @@ To customize the html returned on exceptions or halts, use [DumbTemplates](https
 
 Boom provides form-based authentication (you're using SSL/TLS, right?)  Setting it up is easy but it does require a few steps.
 
-  * Create an `Authenticator`.  This is a functional interface in `com.martiansoftware.boom.auth` that takes a username and passphrase and returns an authenticated `User` object (see `com.martiansoftware.boom.auth.User`) if login is successful, and returns null otherwise:
+  * Implement an `Authenticator`.  This is a functional interface in `com.martiansoftware.boom.auth` that takes a username and passphrase and returns an authenticated `User` object (see `com.martiansoftware.boom.auth.User`) if login is successful, and returns null otherwise:
 ```java
 public interface Authenticator {    
     public User authenticate(String username, String passphrase);
 }
 ```
-  * Create a `FormLoginFilter`.  This is a class in `com.martiansoftware.boom.auth` that filters requests and presents a login page when required.  The default login page templates are in `boom-default-templates.FormLoginFilter` and can be customized by placing your own `FormLoginFilter/login.html` and `FormLoginFilter/loggedout.html` templates in your own template directory as described above.  Take a look at the default login.html form to see the appropriate query parameters and POST destination.  `FormLoginFilter`'s constructor takes a single argument: the `Authenticator` you created in the previous step.
+  * Create a `FormLoginFilter`.  This is a class in `com.martiansoftware.boom.auth` that filters requests and presents a login page when required.  The default login page templates are in `boom-default-templates.FormLoginFilter` and can be customized by placing your own `FormLoginFilter/login.html` and `FormLoginFilter/loggedout.html` templates in your own template directory as described above.  Take a look at the [default login.html form](https://github.com/martylamb/boom/blob/master/src/main/resources/boom-default-templates/FormAuthFilter/login.html) to see the appropriate query parameters and POST destination.  `FormLoginFilter`'s constructor takes a single argument: the `Authenticator` you created in the previous step.
   * Exempt any paths that DO NOT require authentication in the `FormLoginFilter` via its exempt() method.  This method returns the modified `FormLoginFilter` so it may be chained as follows:
 ```java
 myFormLoginFilter.exempt("/favicon.ico").exempt("/styles.css").exempt("/images/logo.png");
