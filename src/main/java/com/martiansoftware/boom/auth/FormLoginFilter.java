@@ -110,9 +110,9 @@ public class FormLoginFilter implements Filter {
             // not authenticated, so remember where user was trying to go and
             // show them the login page
             log.warn("authentication required.");
-            String q = canonicalPath(rqst.raw().getQueryString());
+            String q = rqst.queryString();
             StringBuilder u = new StringBuilder(rqst.url());
-            if (q != null) {
+            if (q != null && q.length() > 0) {
                 u.append('?');
                 u.append(q);
             }
