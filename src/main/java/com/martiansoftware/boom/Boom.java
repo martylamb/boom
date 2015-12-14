@@ -1,6 +1,7 @@
 package com.martiansoftware.boom;
 
 import static com.martiansoftware.boom.Boom.permissions;
+import com.martiansoftware.boom.auth.FormLoginFilter;
 import com.martiansoftware.boom.auth.User;
 import com.martiansoftware.dumbtemplates.DumbTemplate;
 import com.martiansoftware.dumbtemplates.DumbTemplateStore;
@@ -121,10 +122,14 @@ public class Boom {
      * @param perms 
      */
     public static void permissions(Object... perms) {
-        if (isRequestThread()) { // processing a request, so check permissions NOW!
-            User user = User.current().orElse(new User(null));
-            Optional<User> ouser = User.current();
+        if (isRequestThread()) { // processing a request, so check permissions NOW!            
+            if (perms == null || perms.length == 0) return; // no perms needed, OK to continue
+
+            Optional<User> ouser = user();
+            if (!ouser.isPresent()) halt(403); // if there's no user they can't possibly have the right permissions
+            
             boolean authorized = true;
+            User user = ouser.get();
             for (Object p : perms) {
                 if (!user.hasPermission(p)) {
                     authorized = false;
@@ -171,7 +176,7 @@ public class Boom {
     public static void contextFactory(ContextFactory cf) { _templateContextFactory = cf; }
     
     /**
-     * Convert a path to a cananonical form. All instances of "." and ".." are
+     * Convert a path to a canonical form. All instances of "." and ".." are
      * factored out. "/" is returned if the path tries to .. above its root.
      */
     public static String canonicalPath(String path) {
@@ -184,6 +189,10 @@ public class Boom {
         try { result = ResourceBundle.getBundle("bundles." + bundleName); } catch (MissingResourceException ohWell) {};
         if (result == null) result = ResourceBundle.getBundle("boom-default-bundles." + bundleName);
         return result;
+    }
+    
+    public static Optional<User> user() {
+        return FormLoginFilter.currentUser();
     }
     
     /**

@@ -4,82 +4,51 @@ import com.martiansoftware.boom.Boom;
 import java.util.Optional;
 import java.util.Set;
 import spark.Session;
+import spark.Spark;
 
 /**
  *
  * @author mlamb
  */
-public class User {
+public interface User {
 
-    static final String SESSION_KEY = "BOOM_USER";
-
-    protected final String _username;
-    private final Set _permissions = new java.util.HashSet();
-    
     /**
-     * Creates a new User with the specified username.  The username should
-     * be canonical, i.e. in your system's preferred format.  Depending upon
-     * your needs, this might mean e.g. converting an email address to lowercase
-     * and trimming leading/trailing whitespace.
+     * Returns this User's canonical username (trimmed, perhaps all lowercase,
+     * whatever is appropriate for the application).  All non-canonical forms
+     * of the same username MUST resolve to the same canonical username.
      * 
-     * @param username the CANONICAL username for this user.
+     * @return this User's canonical username
      */
-    public User(String username) {
-        _username = username;
-    }
+    public String canonicalName();
     
     /**
-     * Returns the CANONICAL username for this user.  Depending upon your needs,
-     * this might mean e.g. converting an email address to lowercase and trimming
-     * leading/trailing whitespace.
-     * 
-     * @return the CANONICAL username for this user.
+     * Attempts to authenticate this User with the supplied passphrase
+     * @param passphrase
+     * @return true if the authentication is successful, false otherwise.
      */
-    public String username() {
-        return _username;
-    }
+    public boolean authenticate(char[] passphrase);
     
     /**
-     * Indicates whether this user has the specified permission.  Permissions
-     * may be any object that provides hashCode() and equals(), which are used
-     * in making this determination.
-     * 
-     * @param perm the permission we're checking for
-     * @return true iff this user has the specified permission
+     * Indicates whether this User has the specified permission.  Any Object
+     * at all may be used as a permission; in general it's a good idea to
+     * use an Enum for this.
+     * @param permission the permission being checked for
+     * @return true if this User has the specified permission, false otherwise.
      */
-    public boolean hasPermission(Object perm) {
-        return _permissions.contains(perm);
-    }
+    public boolean hasPermission(Object permission);
     
-    /**
-     * Grants this user the specified permission.  Permissions may be any object
-     * that provides hashCode() and equals(), which are used in determining
-     * whether a user has a given permission.
-     * 
-     * @param perm the permission to add
-     * @return this user
-     */
-    protected final User addPermission(Object perm) {
-        _permissions.add(perm);
-        return this;
-    }
-
-    @Override public String toString() {
-        return username();
-    }
-    
-    /**
-     * Returns the current logged-in user, if any
-     * @return the current logged-in user, if any
-     */
-    public static Optional<User> current() {
-        User user = null;
-        if (Boom.isRequestThread()) {
-            Session session = Boom.session(false);
-            if (session != null) {
-                user = session.attribute(SESSION_KEY);
-            }
-        }
-        return user == null ? Optional.empty() : Optional.of(user);
-    }
+//    /**
+//     * Returns the current logged-in user, if any
+//     * @return the current logged-in user, if any
+//     */
+//    public static Optional<User> current() {
+//        User user = null;
+//        if (Boom.isRequestThread()) {
+//            Session session = Boom.session(false);
+//            if (session != null) {
+//                user = session.attribute(SESSION_KEY);
+//            }
+//        }
+//        return user == null ? Optional.empty() : Optional.of(user);        
+//    }
 }
