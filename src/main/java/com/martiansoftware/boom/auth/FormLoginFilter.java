@@ -149,6 +149,7 @@ public class FormLoginFilter implements Filter {
         }
         return Optional.empty();
     }
+    
     public Object logout() {
         UserInfo uinfo = session(true).attribute(USERINFO_SESSION_KEY);
         String uname = (uinfo == null) ? "Anonymous" : uinfo.canonicalName();
@@ -191,10 +192,11 @@ public class FormLoginFilter implements Filter {
             // login OK
             log.info("{} logged in.", user.canonicalName());
             session(true).attribute(USERINFO_SESSION_KEY, new UserInfo(user.canonicalName()));
-            if (url == null) url = "/";
+            if (url == null) url = "/"; // TODO: compute a better default URL (parent of "/login" ?)
             response().redirect(url, 302);
             return null; // not called; redirect throws a HaltException.  needed to satisfy compiler.
         } else {
+            request().attribute(REDIRECT_REQUEST_KEY, url);
             context().put("error_msg", r("FormAuthFilter").getString("login_failed"));
             return showForm(u); // bad username or password
         }
