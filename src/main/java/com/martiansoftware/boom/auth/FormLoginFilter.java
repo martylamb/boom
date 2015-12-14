@@ -1,11 +1,16 @@
 package com.martiansoftware.boom.auth;
 
+import com.martiansoftware.boom.Boom;
 import static com.martiansoftware.boom.Boom.*;
 
 import java.util.Collection;
+import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.function.Predicate;
-import org.eclipse.jetty.util.URIUtil;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spark.Filter;
@@ -24,12 +29,21 @@ public class FormLoginFilter implements Filter {
     private static final Logger log = LoggerFactory.getLogger(FormLoginFilter.class);
     
     // if the user requests a page that requires auth and we redirect them to the
-    // login page, this session property stores the originally requested url so
+    // login page, this request attribute stores the originally requested url so
     // we can redirect them after a successful login
-    private static final String REDIRECT_KEY = FormLoginFilter.class.getCanonicalName() + ".REDIRECT";
+    private static final String REDIRECT_REQUEST_KEY = FormLoginFilter.class.getCanonicalName() + ".REDIRECT";
+    
+    // stores the current user in the request scope for use by the application
+    private static final String USER_REQUEST_KEY = FormLoginFilter.class.getCanonicalName() + ".USER";
+    
+    // stores current user info in the session
+    private static final String USERINFO_SESSION_KEY = FormLoginFilter.class.getCanonicalName() + ".USERINFO";
     
     // verifyies username/password
-    private final Authenticator authenticator;
+    private final UserLookup _userLookup;
+    
+    // tracks all active sessions by canonical username
+    private final Map<String, Set<Session>> _sessionsByCanonicalUsername = new java.util.HashMap<>();
     
     // path to login page form (for GET) or where login is submitted (for POST)
     // form must have "u" and "p" fields for username and password, respectively.
@@ -48,8 +62,8 @@ public class FormLoginFilter implements Filter {
     private final Collection<Predicate<String>> _exemptPredicates = new java.util.HashSet<>();
     
     // creates a new Auth and sets up login/logout paths in spark
-    public FormLoginFilter(Authenticator authenticator) {
-        this.authenticator = authenticator;
+    public FormLoginFilter(UserLookup userLookup) {
+        this._userLookup = userLookup;
         exempt(loginPath);
         exempt(logoutPath);
         get(loginPath, () -> showForm(null));
@@ -96,17 +110,17 @@ public class FormLoginFilter implements Filter {
     
     @Override
     public void handle(Request rqst, Response rspns) throws Exception {
-        log.warn("checking authentication requirements to access {}", rqst.pathInfo());
+        log.trace("checking authentication requirements to access {}", rqst.pathInfo());
         
         if (isExempt(rqst.pathInfo())) {
-            log.warn("exempt: {}", rqst.pathInfo());
+            log.trace("exempt: {}", rqst.pathInfo());
             return; // requested page does not require auth; return from filter
                     // and let spark continue normal processing
         }
         
-        Session session = session(true);
-        User user = session(true).attribute(User.SESSION_KEY);
-        if (user == null) {
+        UserInfo userInfo = session(true).attribute(USERINFO_SESSION_KEY);
+        Optional<User> oUser = (userInfo == null) ? Optional.empty() : _userLookup.byName(userInfo.canonicalName());
+        if (!oUser.isPresent()) {
             // not authenticated, so remember where user was trying to go and
             // show them the login page
             log.warn("authentication required.");
@@ -116,20 +130,28 @@ public class FormLoginFilter implements Filter {
                 u.append('?');
                 u.append(q);
             }
-            rqst.attribute(REDIRECT_KEY, u.toString());
+            rqst.attribute(REDIRECT_REQUEST_KEY, u.toString());
             halt(401, showForm(null));
         } else {
-            // authenticated, so clear any stored redirection and allow
-            // spark to continue normal processing
-            log.warn("authenticated for {}: {}", user.username(), rqst.pathInfo());
-            rqst.attribute(REDIRECT_KEY, null);
+            // authenticated, so clear any stored redirection, store the user in
+            // the request so that the app can access it, allow spark to continue normal processing
+            log.trace("authenticated for {}: {}", oUser.get().canonicalName(), rqst.pathInfo());
+            rqst.attribute(USER_REQUEST_KEY, oUser.get());
+            rqst.attribute(REDIRECT_REQUEST_KEY, null);
         }
         
     }
     
+    public static Optional<User> currentUser() {
+        if (Boom.isRequestThread()) {
+            User user = request().attribute(USER_REQUEST_KEY);
+            if (user != null) return Optional.of(user);
+        }
+        return Optional.empty();
+    }
     public Object logout() {
-        User user = session(true).attribute(User.SESSION_KEY);
-        String uname = (user == null) ? "Anonymous" : user.username();
+        UserInfo uinfo = session(true).attribute(USERINFO_SESSION_KEY);
+        String uname = (uinfo == null) ? "Anonymous" : uinfo.canonicalName();
         log.info("{} logged out.", uname);
         session().invalidate();
         return template("/FormAuthFilter/loggedout.html");
@@ -148,7 +170,7 @@ public class FormLoginFilter implements Filter {
             context("user", user == null ? "" : user);  // TODO: render nulls as empty strings
             context("loginPath", loginPath);
             context("title", r("FormAuthFilter").getString("login_title"));
-            context("url", request().attribute(REDIRECT_KEY));
+            context("url", request().attribute(REDIRECT_REQUEST_KEY));
             cResources("FormAuthFilter", "login_user_prompt", "login_passphrase_prompt", "login_button_label");
             return template("/FormAuthFilter/login.html").render(context());
         } catch (Exception e) {
@@ -164,11 +186,11 @@ public class FormLoginFilter implements Filter {
         String p = request().queryParams("p");
         String url = request().queryParams("url");
         
-        User user = authenticator.authenticate(u, p);
-        if (user != null) {
+        User user = _userLookup.byName(u).orElse(null);
+        if (user != null && user.authenticate(p.toCharArray())) {
             // login OK
-            log.info("{} logged in.", user.username());
-            session(true).attribute(User.SESSION_KEY, user);
+            log.info("{} logged in.", user.canonicalName());
+            session(true).attribute(USERINFO_SESSION_KEY, new UserInfo(user.canonicalName()));
             if (url == null) url = "/";
             response().redirect(url, 302);
             return null; // not called; redirect throws a HaltException.  needed to satisfy compiler.
@@ -178,4 +200,37 @@ public class FormLoginFilter implements Filter {
         }
     }
     
+    void registerSession(String canonicalUsername) {
+        synchronized(_sessionsByCanonicalUsername) {
+            Set<Session> sessions = _sessionsByCanonicalUsername.get(canonicalUsername);
+            if (sessions == null) {
+                sessions = new java.util.HashSet<>();
+                _sessionsByCanonicalUsername.put(canonicalUsername, sessions);
+            }
+            sessions.add(session());
+            log.info("Registered new session for user [{}]", canonicalUsername);
+        }
+    }
+    
+    void unregisterSession(String canonicalUsername) {
+        synchronized(_sessionsByCanonicalUsername) {
+            Set<Session> sessions = _sessionsByCanonicalUsername.get(canonicalUsername);
+            if (sessions == null) return; // should never happen... TODO warn because wtf?
+            sessions.remove(session());
+            if (sessions.isEmpty()) _sessionsByCanonicalUsername.remove(canonicalUsername);
+            log.info("Unregistered session for user [{}]", canonicalUsername);
+        }
+    }
+    
+    private class UserInfo implements HttpSessionBindingListener {
+        private final String _canonicalUsername;
+        public UserInfo(String canonicalUsername) { _canonicalUsername = canonicalUsername; }
+        public String canonicalName() { return _canonicalUsername; }
+        @Override public void valueBound(HttpSessionBindingEvent hsbe) {
+            registerSession(_canonicalUsername);
+        }
+        @Override public void valueUnbound(HttpSessionBindingEvent hsbe) {
+            unregisterSession(_canonicalUsername);
+        }
+    }
 }
