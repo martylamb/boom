@@ -1,5 +1,6 @@
 package com.martiansoftware.boom.auth;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -21,4 +22,10 @@ public interface UserLookup {
      * @return the requested User, or Optional.EMPTY if no such user exists.
      */
     public Optional<User> byName(String username);
+    
+    /**
+     * Returns a List of all Users.
+     * @return a List of all Users.
+     */
+    public List<User> allUsers();
 }
