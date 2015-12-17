@@ -124,7 +124,7 @@ public class Boom {
     public static void permissions(Object... perms) {
         if (isRequestThread()) { // processing a request, so check permissions NOW!            
             if (perms == null || perms.length == 0) return; // no perms needed, OK to continue
-
+            log.warn("perms = {}", perms);
             Optional<User> ouser = user();
             if (!ouser.isPresent()) halt(403); // if there's no user they can't possibly have the right permissions
             
@@ -318,12 +318,17 @@ public class Boom {
         // (since it's mapped to /*) but leaving that up to the user is error-prone,
         // so instead we insert a filter that will run once on the first request
         // to initialize the static content.
+        //
+        // this static content does NOT honor permissions, but DOES require
+        // authentication.
+        //
         // TODO: This could be confounded by requests that come in before all
         // of the routes are set up.  This should be fixed.
         log.info("initStaticContent");
         before("/*", (req, rsp) -> {
             synchronized(_lock) {
                 if (!_initializedStaticContent) {
+                    _permissions = null;
                     get("/*", defaultStaticContentRoute());
                     _initializedStaticContent = true;
                     log.info("Initialized static content!");
@@ -372,6 +377,10 @@ public class Boom {
                                     ResponseTransformer transformer,
                                     TemplateViewRoute tvr,
                                     TemplateEngine engine) {
+        
+        synchronized(_lock) {
+            if (_initializedStaticContent) throw new IllegalStateException("Too late to add routes - static content already initialized.");
+        }
         
         if (log.isDebugEnabled()) {
             StackTraceElement[] stack = Thread.currentThread().getStackTrace();
