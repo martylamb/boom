@@ -42,6 +42,7 @@ public class ClasspathResourceRoute extends ResourceRoute {
         log.debug("Looking for [{}]", path);
         
         URL url = this.getClass().getResource(path);
+        if (url == null) return null;
         if ("file".equals(url.getProtocol())) {
             try {
                 File f = new File(url.toURI());
