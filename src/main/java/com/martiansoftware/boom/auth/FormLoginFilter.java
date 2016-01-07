@@ -23,7 +23,7 @@ import spark.Session;
  * 
  * @author mlamb
  */
-public class FormLoginFilter implements Filter {
+public class FormLoginFilter implements Filter, SessionKiller {
 
     
     private static final Logger log = LoggerFactory.getLogger(FormLoginFilter.class);
@@ -223,6 +223,16 @@ public class FormLoginFilter implements Filter {
             log.info("Unregistered session for user [{}]", canonicalUsername);
         }
     }
+    
+    public void killSessionsFor(String canonicalUsername) {
+        synchronized(_sessionsByCanonicalUsername) {
+            Set<Session> sessions = _sessionsByCanonicalUsername.remove(canonicalUsername);
+            if (sessions == null) return; // nothing to do
+            sessions.stream().map(s -> s.raw()).forEach(s -> { if (s != null) s.invalidate(); });
+        }
+    }
+    
+    public void killSessionsFor(User user) { killSessionsFor(user.canonicalName()); }
     
     private class UserInfo implements HttpSessionBindingListener {
         private final String _canonicalUsername;
