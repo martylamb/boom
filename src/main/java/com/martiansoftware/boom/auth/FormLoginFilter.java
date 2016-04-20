@@ -119,7 +119,7 @@ public class FormLoginFilter implements Filter, SessionKiller {
         }
         
         UserInfo userInfo = session(true).attribute(USERINFO_SESSION_KEY);
-        Optional<User> oUser = (userInfo == null) ? Optional.empty() : _userLookup.byName(userInfo.canonicalName());
+        Optional<? extends User> oUser = (userInfo == null) ? Optional.empty() : _userLookup.byName(userInfo.canonicalName());
         if (!oUser.isPresent()) {
             // not authenticated, so remember where user was trying to go and
             // show them the login page

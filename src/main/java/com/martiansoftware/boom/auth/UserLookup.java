@@ -21,11 +21,11 @@ public interface UserLookup {
      * leading/trailing spaces, etc.
      * @return the requested User, or Optional.EMPTY if no such user exists.
      */
-    public Optional<User> byName(String username);
+    public Optional<? extends User> byName(String username);
     
     /**
      * Returns a List of all Users.
      * @return a List of all Users.
      */
-    public List<User> allUsers();
+    public List<? extends User> allUsers();
 }
