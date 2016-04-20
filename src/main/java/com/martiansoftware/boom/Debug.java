@@ -18,10 +18,10 @@ import spark.Response;
 
 class Debug {
 
+    private static final Logger log = LoggerFactory.getLogger(Debug.class);
+    
     private static final String DEBUG_URL_PREFIX = "/boom-debug";
     private static final String DEBUG_CP_STATIC_RESOURCES = "/boom-debug-static-content";
-    
-    private static final Logger log = LoggerFactory.getLogger(Debug.class);
     
     private final DumbTemplateStore _templates = new DumbLazyClasspathTemplateStore("/boom-debug-templates");
     private final RRLog _rrLog = new RRLog();
@@ -56,12 +56,6 @@ class Debug {
         get(DEBUG_URL_PREFIX + "/list", () -> list());
         
         spark.Spark.after((req,rsp) -> { _rrLog.add(new RR(req,rsp)); });
-        
-//        spark.Spark.after((req,rsp) -> {
-//            
-//            System.out.println("Returned " + rsp.raw().getStatus());
-//            System.out.println()
-//        });
     }
     
     private Object list() {
@@ -80,7 +74,7 @@ class Debug {
         context.put("headers", headers);
         
         DataTable queryParams = new DataTable("Parameter", "Value");
-        req.queryParams().forEach(System.out::println);
+        req.queryParams().forEach(log::debug);
         req.queryParams().forEach((s) -> queryParams.add(s, req.queryParams(s)));
         context.put("queryParams", queryParams);
         

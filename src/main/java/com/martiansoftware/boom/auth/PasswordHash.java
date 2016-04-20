@@ -45,6 +45,8 @@ import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /*
  * PBKDF2 salted password hashing.
@@ -53,6 +55,8 @@ import java.util.Arrays;
  */
 public class PasswordHash
 {
+    private static final Logger log = LoggerFactory.getLogger(PasswordHash.class);
+    
     public static final String PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1";
 
     // The following constants may be changed without breaking existing hashes.
@@ -189,38 +193,38 @@ public class PasswordHash
         {
             // Print out 10 hashes
             for(int i = 0; i < 10; i++)
-                System.out.println(PasswordHash.createHash("p\r\nassw0Rd!".toCharArray()));
+                log.info(PasswordHash.createHash("p\r\nassw0Rd!".toCharArray()));
 
             // Test password validation
             boolean failure = false;
-            System.out.println("Running tests...");
+            log.info("Running tests...");
             for(int i = 0; i < 100; i++)
             {
                 char[] password = (""+i).toCharArray();
                 String hash = createHash(password);
                 String secondHash = createHash(password);
                 if(hash.equals(secondHash)) {
-                    System.out.println("FAILURE: TWO HASHES ARE EQUAL!");
+                    log.error("FAILURE: TWO HASHES ARE EQUAL!");
                     failure = true;
                 }
                 char[] wrongPassword = (""+(i+1)).toCharArray();
                 if(validatePassword(wrongPassword, hash)) {
-                    System.out.println("FAILURE: WRONG PASSWORD ACCEPTED!");
+                    log.error("FAILURE: WRONG PASSWORD ACCEPTED!");
                     failure = true;
                 }
                 if(!validatePassword(password, hash)) {
-                    System.out.println("FAILURE: GOOD PASSWORD NOT ACCEPTED!");
+                    log.error("FAILURE: GOOD PASSWORD NOT ACCEPTED!");
                     failure = true;
                 }
             }
             if(failure)
-                System.out.println("TESTS FAILED!");
+                log.error("TESTS FAILED!");
             else
-                System.out.println("TESTS PASSED!");
+                log.info("TESTS PASSED!");
         }
         catch(Exception ex)
         {
-            System.out.println("ERROR: " + ex);
+            log.error("ERROR: " + ex);
         }
     }
 

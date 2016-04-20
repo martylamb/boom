@@ -2,6 +2,8 @@ package com.martiansoftware.boom;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -9,6 +11,8 @@ import java.nio.file.Paths;
  */
 public class PathResolver {
 
+    private static final Logger log = LoggerFactory.getLogger(PathResolver.class);
+    
     private static final Path TOP = Paths.get("/");
     private final Path _appRoot;
     
@@ -38,10 +42,10 @@ public class PathResolver {
     
     public static void main(String[] args) {
         PathResolver pr = new PathResolver("myapp/..//////////something//");
-        System.out.println(pr.resolve("//////////////.//../../../bookmarks//a/b/somewhere/../c"));
-        System.out.println(pr.resolve((String) null));
-        System.out.println(pr.resolve((Path) null));
-        System.out.println(pr.resolve(""));
-        System.out.println(pr.resolve("/"));
+        log.info(pr.resolve("//////////////.//../../../bookmarks//a/b/somewhere/../c"));
+        log.info(pr.resolve((String) null));
+        log.info(pr.resolve((Path) null));
+        log.info(pr.resolve(""));
+        log.info(pr.resolve("/"));
     }
 }
