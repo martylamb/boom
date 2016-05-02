@@ -38,7 +38,7 @@ class BoomContext {
     }
     
     void cleanup() {
-        log.debug("Cleaning up.");
+        log.trace("Cleaning up.");
         if (tmp != null && Files.exists(tmp)) {
             try {
                 // TODO: pull this out to an API
