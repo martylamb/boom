@@ -332,9 +332,7 @@ public class Boom {
                     get("/*", defaultStaticContentRoute());
                     _initializedStaticContent = true;
                     log.info("Initialized static content!");
-                } else {
-                    log.info("Already initialized!");
-                }
+                } 
             }
         });
     }
@@ -351,7 +349,7 @@ public class Boom {
     
     private static void initThreadLocalsFilter() {
         Spark.before((Request req, Response rsp) -> {
-            log.info("FILTER: initThreadLocals");
+            log.trace("FILTER: initThreadLocals");
             Map<String, Object> tctx = _templateContextFactory.createContext();
             tctx.put(Constants.BOOM_ROOT, _pathResolver.resolve("/"));
             _boomContext.set(new BoomContext(req, rsp, tctx));            
@@ -360,7 +358,7 @@ public class Boom {
     
     private static void initLoginFilter() {
         Spark.before((Request req, Response rsp) -> {
-            log.info("FILTER: loginFilter");
+            log.trace("FILTER: loginFilter");
             Filter f = _loginFilter;
             if (f != null) f.handle(req, rsp);
         });
