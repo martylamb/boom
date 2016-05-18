@@ -39,6 +39,7 @@ public class ClasspathResourceRoute extends ResourceRoute {
     
     @Override InputStream getInputStream(String path) {
         if (_prefix != null) path = _prefix.resolve(path.replaceAll("^/*", "")).toString();
+        path = path.replaceAll("\\\\", "/"); // needed on Windows
         log.debug("Looking for [{}]", path);
         
         URL url = this.getClass().getResource(path);
