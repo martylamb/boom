@@ -124,7 +124,6 @@ public class Boom {
     public static void permissions(Object... perms) {
         if (isRequestThread()) { // processing a request, so check permissions NOW!            
             if (perms == null || perms.length == 0) return; // no perms needed, OK to continue
-            log.warn("perms = {}", perms);
             Optional<User> ouser = user();
             if (!ouser.isPresent()) halt(403); // if there's no user they can't possibly have the right permissions
             
