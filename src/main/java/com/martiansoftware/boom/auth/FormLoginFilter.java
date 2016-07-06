@@ -123,7 +123,7 @@ public class FormLoginFilter implements Filter, SessionKiller {
         if (!oUser.isPresent()) {
             // not authenticated, so remember where user was trying to go and
             // show them the login page
-            log.warn("authentication required.");
+            log.debug("authentication required.");
             String q = rqst.queryString();
             StringBuilder u = new StringBuilder(rqst.url());
             if (q != null && q.length() > 0) {
