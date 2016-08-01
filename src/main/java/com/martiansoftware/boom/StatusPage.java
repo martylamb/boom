@@ -18,7 +18,7 @@ public class StatusPage {
     private static final Logger log = LoggerFactory.getLogger(StatusPage.class);
     
     public static BoomResponse of(HaltException he) {
-        log(he.getStatusCode(), he);
+        log.warn("Halt({}) : {} requested {}", he.getStatusCode(), request().ip(), request().pathInfo());
         return of(he.getStatusCode(), he.getBody(), false);
     }
     

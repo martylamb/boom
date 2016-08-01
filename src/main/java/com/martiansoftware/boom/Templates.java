@@ -22,7 +22,9 @@ class Templates {
         // emsmarten it a little.
         DumbLogger d = new DumbLogger() {
             @Override public void log(String msg) {
-                if (msg.startsWith("Error: ")) {
+                if (msg.contains("Template not found")) {
+                    log.debug(msg.substring(7));
+                } else if (msg.startsWith("Error: ")) {
                     log.error(msg.substring(7));
                 } else if (msg.startsWith("Warning: ")) {
                     log.warn(msg.substring(9));
