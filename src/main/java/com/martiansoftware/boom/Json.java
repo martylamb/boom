@@ -27,6 +27,10 @@ public class Json {
         return _gson;
     }
 
+    public static void use(Gson gson) {
+        _gson = gson;
+    }
+    
     public static String toJson(Object src) { return gson().toJson(src); }
     public static void toJson(Object src, Appendable writer) { gson().toJson(src, writer); }
     public static void toJson(Object src, Path p) throws IOException {
