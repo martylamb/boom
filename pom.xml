@@ -11,7 +11,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         
-        <version.spark>2.3</version.spark>
+        <version.spark>2.5.5</version.spark>
         <version.gson>2.3.1</version.gson>
         <version.dumbtemplates>0.1.1</version.dumbtemplates>
         <version.slf4j>1.7.21</version.slf4j>
