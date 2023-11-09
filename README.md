@@ -1,3 +1,7 @@
+> :warning: On 2023-11-09, I cleaned up some incorrect contact information (user.name and user.email) in the commit history via [git-filter-repo](https://github.com/newren/git-filter-repo).
+>
+> If you have a clone that predates this change, you will need to run `git pull --rebase` to get the new history and allow git to work properly.  Clones made after this date don't need to do anything.
+
 # Boom - a collection of helpers for building simple web applications on the Spark framework
 
 Boom is a simple convention-over-configuration library that wraps around [Spark](http://sparkjava.com) to allow simple web applications to be built extremely quickly.  Its primary goal is to match my own development style and reduce boilerplate.  Hopefully you'll find it useful, too.
